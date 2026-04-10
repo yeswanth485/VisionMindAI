@@ -34,4 +34,12 @@ export const documentAPI = {
         const response = await apiClient.get<DocumentResponse>(`/document/${id}`);
         return response.data;
     },
+
+    /**
+     * Fetch all processed documents history
+     */
+    getHistory: async (): Promise<any[]> => {
+        const response = await apiClient.get<any[]>('/documents');
+        return response.data;
+    },
 };

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException, BackgroundTasks
 from fastapi.responses import JSONResponse
-from sqlmodel import Session
-from typing import Dict, Any
+from sqlmodel import Session, select
+from typing import Dict, Any, List
 import uuid
 import aiofiles
 import os
@@ -133,3 +133,22 @@ async def get_document(document_id: uuid.UUID):
             "status": document.status,
             "created_at": document.created_at.isoformat() if document.created_at else None
         }
+
+@router.get("/documents")
+async def list_documents() -> List[Dict[str, Any]]:
+    """
+    Retrieve all processed documents ordered by creation date
+    """
+    with Session(get_engine()) as session:
+        statement = select(Document).order_by(Document.created_at.desc())
+        documents = session.exec(statement).all()
+        
+        return [
+            {
+                "id": str(doc.id),
+                "doc_type": doc.doc_type,
+                "status": doc.status,
+                "created_at": doc.created_at.isoformat() if doc.created_at else None
+            }
+            for doc in documents
+        ]
