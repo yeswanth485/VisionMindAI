@@ -11,9 +11,7 @@ services:
     dockerfilePath: backend/Dockerfile
     envVars:
       - key: DATABASE_URL
-        fromDatabase:
-          name: visionmind-db
-          property: connectionString
+        sync: false
       - key: OPENAI_API_KEY
         sync: false
       - key: TESSERACT_CMD
@@ -22,10 +20,3 @@ services:
         value: /usr/share/tesseract-ocr/4.00/tessdata
     autoDeploy: true
     healthCheckPath: /health
-
-databases:
-  - name: visionmind-db
-    databaseName: visionmind
-    user: visionmind_user
-    plan: free
-    region: oregon
