@@ -2,7 +2,7 @@ import axios from 'axios';
 import { DocumentResponse, UploadResponse } from '../types';
 
 // Points to the Render backend or localhost during dev
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://visionmind-backend-eg9f.onrender.com/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://visionmind-backend.onrender.com/api';
 
 const apiClient = axios.create({
     baseURL: API_BASE_URL,

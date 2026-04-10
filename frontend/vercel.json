@@ -1,5 +1,4 @@
-{
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "https://visionmind-backend-eg9f.onrender.com/api/$1" }
+    { "source": "/api/(.*)", "destination": "https://visionmind-backend.onrender.com/api/$1" }
   ]
 }

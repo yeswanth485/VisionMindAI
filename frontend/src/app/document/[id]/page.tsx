@@ -131,13 +131,13 @@ export default function DocumentResultPage({ params }: { params: { id: string } 
                 {doc.file_url ? (
                   doc.file_url.toLowerCase().endsWith('.pdf') ? (
                     <embed 
-                      src={process.env.NEXT_PUBLIC_API_URL ? `${process.env.NEXT_PUBLIC_API_URL.replace('/api', '')}${doc.file_url}` : `https://visionmind-backend-eg9f.onrender.com${doc.file_url}`}
+                      src={process.env.NEXT_PUBLIC_API_URL ? `${process.env.NEXT_PUBLIC_API_URL.replace('/api', '')}${doc.file_url}` : `https://visionmind-backend.onrender.com${doc.file_url}`}
                       type="application/pdf"
                       className="w-full h-full"
                     />
                   ) : (
                     <img 
-                      src={process.env.NEXT_PUBLIC_API_URL ? `${process.env.NEXT_PUBLIC_API_URL.replace('/api', '')}${doc.file_url}` : `https://visionmind-backend-eg9f.onrender.com${doc.file_url}`}
+                      src={process.env.NEXT_PUBLIC_API_URL ? `${process.env.NEXT_PUBLIC_API_URL.replace('/api', '')}${doc.file_url}` : `https://visionmind-backend.onrender.com${doc.file_url}`}
                       alt="Source Document"
                       className="w-full h-full object-contain"
                     />
