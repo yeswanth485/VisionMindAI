@@ -1,7 +1,12 @@
+import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes import router as api_router
 from app.core.database import create_db_and_tables
+
+# Setup basic logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 app = FastAPI(title="VisionMind AI Document Intelligence System", version="1.0.0")
 
@@ -20,7 +25,9 @@ app.include_router(api_router, prefix="/api")
 @app.on_event("startup")
 async def startup_event():
     """Initialize database on startup"""
+    logger.info("Application starting up... Initializing components.")
     create_db_and_tables()
+    logger.info("Startup complete.")
 
 @app.get("/")
 async def root():

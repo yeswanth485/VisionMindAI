@@ -8,15 +8,11 @@ services:
     buildCommand: ""
     startCommand: ""
     dockerContext: backend
-    dockerfilePath: backend/Dockerfile
+    dockerfilePath: Dockerfile
     envVars:
       - key: DATABASE_URL
         sync: false
       - key: OPENAI_API_KEY
         sync: false
-      - key: TESSERACT_CMD
-        value: /usr/bin/tesseract
-      - key: TESSDATA_PREFIX
-        value: /usr/share/tesseract-ocr/4.00/tessdata
     autoDeploy: true
     healthCheckPath: /health
