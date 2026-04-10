@@ -18,14 +18,21 @@ app = FastAPI(title="VisionMind AI Document Intelligence System", version="1.0.0
 # Mount Static Files to serve uploaded documents
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
-# Configure CORS
+# Configure CORS - Highly Permissive for Debugging
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, replace with specific origins
-    allow_credentials=False,
+    allow_origins=["https://vision-mind-ai.vercel.app", "http://localhost:3000"],
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.middleware("http")
+async def log_requests(request, call_next):
+    logger.info(f"Incoming request: {request.method} {request.url}")
+    response = await call_next(request)
+    logger.info(f"Response status: {response.status_code}")
+    return response
 
 # Include API routes
 app.include_router(api_router, prefix="/api")

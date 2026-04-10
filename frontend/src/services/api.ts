@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { DocumentResponse, UploadResponse } from '../types';
 
-// Force the correct Render backend to ignore any cached invalid environment variables in Vercel
-const API_BASE_URL = 'https://visionmind-backend.onrender.com/api';
+// Use the Vercel proxy defined in vercel.json to bypass all CORS issues
+const API_BASE_URL = '/api';
 
 const apiClient = axios.create({
     baseURL: API_BASE_URL,
