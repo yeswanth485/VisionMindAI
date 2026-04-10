@@ -1,10 +1,13 @@
 import json
 import openai
 from typing import List, Dict, Any
-from app.core.config import settings
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Initialize OpenAI client
-openai.api_key = settings.OPENAI_API_KEY
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 
 async def suggest_actions(structured_json: Dict[str, Any], doc_type: str, risk_level: str) -> List[Dict[str, Any]]:
