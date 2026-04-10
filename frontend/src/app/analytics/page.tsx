@@ -149,9 +149,9 @@ export default function AnalyticsPage() {
                   <p className="text-textMuted text-xs uppercase tracking-wider">Avg Risk Level</p>
                   <p className="text-2xl font-bold text-white">
                     {summary.risk_distribution ? 
-                      Object.entries(summary.risk_distribution).reduce((acc, [level, count]) => {
+                      Object.entries(summary.risk_distribution).reduce((acc, [level, count]: [string, any]) => {
                         const weights = { low: 1, medium: 2, high: 3 };
-                        return acc + (weights[level as keyof typeof weights] || 0) * count;
+                        return acc + (weights[level as keyof typeof weights] || 0) * (count as number);
                       }, 0) / (summary.total_documents || 1) 
                       : 0
                     }.toFixed(1)
@@ -166,16 +166,16 @@ export default function AnalyticsPage() {
             <div className="glass-card p-6">
               <h3 className="text-white font-semibold mb-4">Risk Distribution</h3>
               <div className="space-y-3">
-                {summary.risk_distribution && Object.entries(summary.risk_distribution).map(([level, count]) => (
+                {summary.risk_distribution && Object.entries(summary.risk_distribution).map(([level, count]: [string, any]) => (
                   <div key={level} className="flex items-center">
                     <span className="w-3 h-3 rounded-full" 
                       style={{ backgroundColor: level === 'high' ? '#ef4444' : level === 'medium' ? '#f59e0b' : '#ec4899' }}></span>
                     <span className="flex-1 text-textMuted">{level}</span>
                     <div className="w-24 bg-white/5 rounded-full relative">
-                      <div className={`h-2 bg-${level === 'high' ? '#ef4444' : level === 'medium' ? '#f59e0b' : '#ec4899'} rounded-full` 
-                        style={{ width: `${count * 20}%` }}></div>
+                      <div className="h-2 rounded-full" 
+                        style={{ backgroundColor: level === 'high' ? '#ef4444' : level === 'medium' ? '#f59e0b' : '#ec4899', width: `${count * 20}%` }}></div>
                     </div>
-                    <span className="w-8 text-textMuted text-right">{count}</span>
+                    <span className="w-8 text-textMuted text-right">{String(count)}</span>
                   </div>
                 ))}
               </div>
@@ -204,8 +204,9 @@ export default function AnalyticsPage() {
                             {new Date(day.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                           </div>
                         </div>
-                      )}
-                    </div>
+                      );
+                    })}
+                  </div>
                   </div>
                 )
                 : (
@@ -232,7 +233,7 @@ export default function AnalyticsPage() {
                     </div>
                     <div className="text-primary font-semibold">{vendor.count}</div>
                   </div>
-                ))
+                ))}
               </div>
             ) : (
               <p className="text-textMuted text-center py-8">No vendor data available</p>
