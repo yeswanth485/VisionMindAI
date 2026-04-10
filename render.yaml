@@ -1,3 +1,4 @@
+version: 1
 services:
   - type: web
     name: visionmind-backend
@@ -6,7 +7,8 @@ services:
     region: oregon
     buildCommand: ""
     startCommand: ""
-    dockerfilePath: ./Dockerfile
+    dockerContext: backend
+    dockerfilePath: backend/Dockerfile
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -20,3 +22,10 @@ services:
         value: /usr/share/tesseract-ocr/4.00/tessdata
     autoDeploy: true
     healthCheckPath: /health
+
+databases:
+  - name: visionmind-db
+    databaseName: visionmind
+    user: visionmind_user
+    plan: free
+    region: oregon

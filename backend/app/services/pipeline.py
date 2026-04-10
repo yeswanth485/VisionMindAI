@@ -12,7 +12,7 @@ load_dotenv()
 
 class DocumentPipeline:
     def __init__(self):
-        self.openai_client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        self.openai_client = openai.AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
     
     async def preprocess(self, file_content: bytes, filename: str) -> list:
         """

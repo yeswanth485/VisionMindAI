@@ -7,6 +7,10 @@ load_dotenv()
 # Database URL from environment variable
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:password@localhost/visionmind")
 
+# Render/Heroku fix: SQLAlchemy requires 'postgresql://' but platforms often provide 'postgres://'
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
 # Create engine
 engine = create_engine(DATABASE_URL, echo=True)
 
