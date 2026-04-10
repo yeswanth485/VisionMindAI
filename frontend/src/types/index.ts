@@ -1,5 +1,5 @@
 export interface DocumentResponse {
-    id: str;
+    id: string;
     file_url?: string;
     raw_text?: string;
     doc_type?: string;
