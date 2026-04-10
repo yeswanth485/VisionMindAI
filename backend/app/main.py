@@ -1,6 +1,8 @@
+import os
 import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from app.api.routes import router as api_router
 from app.core.database import create_db_and_tables
 
@@ -8,7 +10,13 @@ from app.core.database import create_db_and_tables
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+# Ensure uploads directory exists early so StaticFiles doesn't crash on boot
+os.makedirs("uploads", exist_ok=True)
+
 app = FastAPI(title="VisionMind AI Document Intelligence System", version="1.0.0")
+
+# Mount Static Files to serve uploaded documents
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 # Configure CORS
 app.add_middleware(

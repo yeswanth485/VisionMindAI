@@ -129,12 +129,19 @@ export default function DocumentResultPage({ params }: { params: { id: string } 
             <ResultCard title="Source Document" icon="📄" delay={100}>
               <div className="h-full bg-black/40 rounded-xl overflow-hidden border border-white/5 relative group">
                 {doc.file_url ? (
-                  // Uses the Render backend URL mapped to the upload file path
-                  <img 
-                    src={process.env.NEXT_PUBLIC_API_URL ? `${process.env.NEXT_PUBLIC_API_URL.replace('/api', '')}${doc.file_url}` : `https://visionmind-backend-eg9f.onrender.com${doc.file_url}`}
-                    alt="Source Document"
-                    className="w-full h-full object-contain"
-                  />
+                  doc.file_url.toLowerCase().endsWith('.pdf') ? (
+                    <embed 
+                      src={process.env.NEXT_PUBLIC_API_URL ? `${process.env.NEXT_PUBLIC_API_URL.replace('/api', '')}${doc.file_url}` : `https://visionmind-backend-eg9f.onrender.com${doc.file_url}`}
+                      type="application/pdf"
+                      className="w-full h-full"
+                    />
+                  ) : (
+                    <img 
+                      src={process.env.NEXT_PUBLIC_API_URL ? `${process.env.NEXT_PUBLIC_API_URL.replace('/api', '')}${doc.file_url}` : `https://visionmind-backend-eg9f.onrender.com${doc.file_url}`}
+                      alt="Source Document"
+                      className="w-full h-full object-contain"
+                    />
+                  )
                 ) : (
                   <div className="flex items-center justify-center h-full text-textMuted">Preview not available</div>
                 )}
