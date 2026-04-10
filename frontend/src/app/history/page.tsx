@@ -68,13 +68,13 @@ export default function HistoryPage() {
                     <div className="p-3 bg-white/5 rounded-xl text-2xl group-hover:bg-primary/20 transition-colors">
                       {doc.doc_type === 'invoice' ? '📄' : doc.doc_type === 'receipt' ? '🧾' : '📑'}
                     </div>
-                    <status-badge className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
+                    <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
                       doc.status === 'completed' ? 'bg-accent/10 border-accent/30 text-accent' :
                       doc.status === 'failed' ? 'bg-red-500/10 border-red-500/30 text-red-400' :
                       'bg-primary/10 border-primary/30 text-primary animate-pulse'
                     }`}>
                       {doc.status}
-                    </status-badge>
+                    </span>
                   </div>
                   
                   <h3 className="text-lg font-bold text-white mb-1 capitalize">
