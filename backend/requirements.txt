@@ -9,3 +9,5 @@ pdf2image
 openai
 python-dotenv
 aiofiles
+chromadb==0.4.24
+openai[embeddings]>=1.0.0

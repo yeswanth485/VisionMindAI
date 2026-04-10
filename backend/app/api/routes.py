@@ -84,7 +84,7 @@ async def process_document_background(file_content: bytes, filename: str, doc_id
     """
     try:
         # Process document through pipeline
-        result = await pipeline.process_document(file_content, filename)
+        result = await pipeline.process_document(file_content, filename, doc_id)
         
         # Update database with results
         with Session(get_engine()) as session:

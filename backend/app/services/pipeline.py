@@ -1,12 +1,17 @@
 import os
 import asyncio
 import io
+import uuid
 from typing import Dict, Any, Optional
 import pytesseract
 from pdf2image import convert_from_bytes
 from PIL import Image
 import openai
 from dotenv import load_dotenv
+
+# Import new services for Phase 2
+from .rag_service import store_embedding
+from .action_engine import suggest_actions
 
 load_dotenv()
 
@@ -251,7 +256,7 @@ class DocumentPipeline:
                 "confidence_score": 0
             }
     
-    async def process_document(self, file_content: bytes, filename: str) -> Dict[str, Any]:
+    async def process_document(self, file_content: bytes, filename: str, document_id: uuid.UUID) -> Dict[str, Any]:
         """
         Main pipeline orchestrator
         """
@@ -279,6 +284,26 @@ class DocumentPipeline:
                 structured_data, validation_result, insights_result, doc_type
             )
             
+            # Store embedding for RAG (background task - don't await to avoid blocking)
+            # Store the embedding with the actual document_id
+            try:
+                await store_embedding(document_id, raw_text)
+            except Exception as e:
+                print(f"Embedding storage error: {e}")
+            
+            # Generate action suggestions
+            try:
+                suggested_actions = await suggest_actions(
+                    structured_data, 
+                    doc_type, 
+                    decision_result.get("risk_level", "medium")
+                )
+                # Add suggested actions to decision result
+                if "suggested_actions" not in decision_result:
+                    decision_result["suggested_actions"] = suggested_actions
+            except Exception as e:
+                print(f"Action engine error: {e}")
+            
             return {
                 "file_url": f"/uploads/{filename}",  # Placeholder - actual file storage would be implemented
                 "raw_text": raw_text,
@@ -288,6 +313,19 @@ class DocumentPipeline:
                 "insights": insights_result,
                 "decision": decision_result,
                 "status": "completed"
+            }
+            
+        except Exception as e:
+            print(f"Pipeline error: {e}")
+            return {
+                "file_url": None,
+                "raw_text": "",
+                "doc_type": "error",
+                "structured_json": {"error": str(e)},
+                "validation": {"is_valid": False, "validation_score": 0},
+                "insights": {"summary": "Processing failed"},
+                "decision": {"risk_level": "high", "decision_status": "failed"},
+                "status": "failed"
             }
             
         except Exception as e:

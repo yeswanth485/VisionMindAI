@@ -9,6 +9,9 @@ export default function Sidebar() {
   const links = [
     { name: 'Dashboard', href: '/', icon: '📊' },
     { name: 'History', href: '/history', icon: '🕒' },
+    { name: 'Chat', href: '/chat', icon: '💬' },
+    { name: 'Analytics', href: '/analytics', icon: '📈' },
+    { name: 'Batch Upload', href: '/batch', icon: '📤' },
     { name: 'Settings', href: '/settings', icon: '⚙️' },
   ];
 
@@ -41,9 +44,9 @@ export default function Sidebar() {
         })}
       </nav>
 
-      <div className="p-6">
+       <div className="p-6">
         <div className="glass-card p-4 rounded-xl text-xs text-textMuted text-center">
-          <p>VisionMind AI v1.0.0</p>
+          <p>VisionMind AI v2.0.0</p>
           <p className="mt-1">© 2026</p>
         </div>
       </div>
