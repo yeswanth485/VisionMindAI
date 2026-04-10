@@ -20,12 +20,14 @@ class DocumentPipeline:
         Returns list of PIL Images
         """
         if filename.lower().endswith('.pdf'):
-            # Convert PDF to images
-            images = convert_from_bytes(file_content)
+            # Convert PDF to images in a separate thread
+            images = await asyncio.to_thread(convert_from_bytes, file_content)
             return images
         else:
-            # Load image file
-            image = Image.open(io.BytesIO(file_content))
+            # Load image file in a separate thread
+            def _load_image():
+                return Image.open(io.BytesIO(file_content)).copy()
+            image = await asyncio.to_thread(_load_image)
             return [image]
     
     async def ocr_extract(self, images: list) -> str:
@@ -33,8 +35,13 @@ class DocumentPipeline:
         Extract text from images using pytesseract OCR
         """
         full_text = ""
+        
+        def _extract(img):
+            return pytesseract.image_to_string(img)
+
         for image in images:
-            text = pytesseract.image_to_string(image)
+            # Run OCR in a separate thread to prevent blocking event loop
+            text = await asyncio.to_thread(_extract, image)
             full_text += text + "\n"
         return full_text.strip()
     
