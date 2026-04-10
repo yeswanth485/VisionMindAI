@@ -8,7 +8,7 @@ import os
 
 from app.models.document import Document
 from app.services.pipeline import DocumentPipeline
-from app.core.database import engine
+from app.core.database import get_engine
 
 router = APIRouter()
 pipeline = DocumentPipeline()
@@ -50,7 +50,7 @@ async def upload_document(
             await f.write(content)
         
         # Create document record in database
-        with Session(engine) as session:
+        with Session(get_engine()) as session:
             document = Document(
                 id=doc_id,
                 file_url=f"/{file_path}",
@@ -87,7 +87,7 @@ async def process_document_background(file_content: bytes, filename: str, doc_id
         result = await pipeline.process_document(file_content, filename)
         
         # Update database with results
-        with Session(engine) as session:
+        with Session(get_engine()) as session:
             document = session.get(Document, doc_id)
             if document:
                 document.file_url = result.get("file_url")
@@ -103,7 +103,7 @@ async def process_document_background(file_content: bytes, filename: str, doc_id
                 
     except Exception as e:
         # Update document status to failed
-        with Session(engine) as session:
+        with Session(get_engine()) as session:
             document = session.get(Document, doc_id)
             if document:
                 document.status = "failed"
@@ -116,7 +116,7 @@ async def get_document(document_id: uuid.UUID):
     """
     Retrieve document status and results by ID
     """
-    with Session(engine) as session:
+    with Session(get_engine()) as session:
         document = session.get(Document, document_id)
         if not document:
             raise HTTPException(status_code=404, detail="Document not found")
