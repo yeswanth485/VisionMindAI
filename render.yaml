@@ -15,7 +15,7 @@ services:
           name: visionmind-db
           property: connectionString
       - key: OPENAI_API_KEY
-        type: secret
+        sync: false
       - key: TESSERACT_CMD
         value: /usr/bin/tesseract
       - key: TESSDATA_PREFIX
