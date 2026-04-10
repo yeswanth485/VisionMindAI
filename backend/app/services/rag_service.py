@@ -2,10 +2,13 @@ import uuid
 import openai
 import chromadb
 from typing import List, Dict, Any
-from app.core.config import settings
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Initialize OpenAI client
-openai.api_key = settings.OPENAI_API_KEY
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 # Initialize ChromaDB client
 chroma_client = chromadb.PersistentClient(path="./chroma_data")
