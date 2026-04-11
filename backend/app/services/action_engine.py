@@ -6,15 +6,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Initialize OpenAI client for OpenRouter
-client = AsyncOpenAI(
-    api_key=os.getenv("OPENAI_API_KEY"),
-    base_url="https://openrouter.ai/api/v1",
-    default_headers={
-        "HTTP-Referer": "https://visionmind-ai.vercel.app",
-        "X-Title": "VisionMind AI",
-    }
-)
+from app.core.ai_client import ai_client as client
 
 async def suggest_actions(structured_json: Dict[str, Any], doc_type: str, risk_level: str) -> List[Dict[str, Any]]:
     """Suggest actions based on document data using GPT"""

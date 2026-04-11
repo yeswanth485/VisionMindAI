@@ -12,20 +12,14 @@ from dotenv import load_dotenv
 # Import new services for Phase 2
 from .rag_service import store_embedding
 from .action_engine import suggest_actions
+from app.core.ai_client import ai_client
 
 load_dotenv()
 
 class DocumentPipeline:
     def __init__(self):
-        # OpenRouter uses the same OpenAI SDK format but with a different base URL
-        self.openai_client = openai.AsyncOpenAI(
-            api_key=os.getenv("OPENAI_API_KEY"),
-            base_url="https://openrouter.ai/api/v1",
-            default_headers={
-                "HTTP-Referer": "https://visionmind-ai.vercel.app",
-                "X-Title": "VisionMind AI",
-            }
-        )
+        # Using the centralized AI client from app.core
+        self.openai_client = ai_client
     
     async def preprocess(self, file_content: bytes, filename: str) -> list:
         """
