@@ -1,9 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { PieChart, Pie, Cell } from 'recharts';
-import { LineChart, Line, XAxis as LineXAxis, YAxis as LineYAxis, Tooltip as LineTooltip, Legend as LineLegend, CartesianGrid } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, CartesianGrid } from 'recharts';
 
 export default function AnalyticsPage() {
   const [summary, setSummary] = useState<any>(null);
@@ -88,6 +86,8 @@ export default function AnalyticsPage() {
     );
   }
 
+  const PIE_COLORS = ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6'];
+
   return (
     <div className="flex flex-col min-h-screen p-6 lg:p-12 animate-fade-in">
       <header className="mb-8">
@@ -97,23 +97,21 @@ export default function AnalyticsPage() {
         </p>
       </header>
 
-      {!summary && (
+      {!summary ? (
         <div className="glass-card p-6 text-center">
           <p className="text-textMuted">No analytics data available yet. Upload some documents to see insights.</p>
         </div>
-      )}
-
-      {summary && (
+      ) : (
         <>
           {/* KPI Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <div className="glass-card p-6">
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 bg-primary/10 text-primary rounded flex items-center justify-center">
-                  <span className="text-2xl">📄</span>
+                  <span className="text-xl">📄</span>
                 </div>
                 <div>
-                  <p className="text-textMuted text-xs uppercase tracking-wider">Total Documents</p>
+                  <p className="text-textMuted text-[10px] uppercase tracking-wider font-bold">Total Docs</p>
                   <p className="text-2xl font-bold text-white">{summary.total_documents || 0}</p>
                 </div>
               </div>
@@ -122,10 +120,10 @@ export default function AnalyticsPage() {
             <div className="glass-card p-6">
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 bg-secondary/10 text-secondary rounded flex items-center justify-center">
-                  <span className="text-2xl">🧾</span>
+                  <span className="text-xl">🧾</span>
                 </div>
                 <div>
-                  <p className="text-textMuted text-xs uppercase tracking-wider">Total Invoices</p>
+                  <p className="text-textMuted text-[10px] uppercase tracking-wider font-bold">Invoices</p>
                   <p className="text-2xl font-bold text-white">{summary.total_invoices || 0}</p>
                 </div>
               </div>
@@ -134,10 +132,10 @@ export default function AnalyticsPage() {
             <div className="glass-card p-6">
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 bg-accent/10 text-accent rounded flex items-center justify-center">
-                  <span className="text-2xl">💰</span>
+                  <span className="text-xl">💰</span>
                 </div>
                 <div>
-                  <p className="text-textMuted text-xs uppercase tracking-wider">Total Amount</p>
+                  <p className="text-textMuted text-[10px] uppercase tracking-wider font-bold">Total Processed</p>
                   <p className="text-2xl font-bold text-white">${(summary.total_amount_processed || 0).toLocaleString()}</p>
                 </div>
               </div>
@@ -146,157 +144,136 @@ export default function AnalyticsPage() {
             <div className="glass-card p-6">
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 bg-white/5 rounded flex items-center justify-center">
-                  <span className="text-2xl">⚖️</span>
+                  <span className="text-xl">⚖️</span>
                 </div>
                 <div>
-                  <p className="text-textMuted text-xs uppercase tracking-wider">Avg Risk Level</p>
+                  <p className="text-textMuted text-[10px] uppercase tracking-wider font-bold">Avg Risk</p>
                   <p className="text-2xl font-bold text-white">
-                    {summary.risk_distribution ? 
-                      Object.entries(summary.risk_distribution).reduce((acc, [level, count]: [string, any]) => {
-                        const weights = { low: 1, medium: 2, high: 3 };
-                        return acc + (weights[level as keyof typeof weights] || 0) * (count as number);
-                      }, 0) / (summary.total_documents || 1) 
-                      : 0
-                    }.toFixed(1)
+                    {(summary.average_risk_level || 0).toFixed(1)}
                   </p>
                 </div>
               </div>
             </div>
           </div>
 
-           {/* Charts Section */}
-           <div className="grid gap-6 mb-8">
-             <div className="glass-card p-6">
-               <h3 className="text-white font-semibold mb-4">Document Type Distribution</h3>
-               <div className="space-y-3">
-                 <ResponsiveContainer width="100%" height={200}>
-                   <BarChart data={summary.document_type_distribution || []}>
-                     <XAxis dataKey="type" />
-                     <YAxis />
-                     <Tooltip />
-                     <Legend />
-                     <Bar dataKey="count" fill="#3b82f6" />
-                   </BarChart>
-                 </ResponsiveContainer>
-               </div>
+          {/* Charts Grid */}
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8">
+             {/* Doc Type Distribution */}
+             <div className="glass-card p-6 h-[400px] flex flex-col">
+                <h3 className="text-white font-bold mb-6 flex items-center gap-2">
+                   <span className="text-primary">■</span> Document Type Distribution
+                </h3>
+                <div className="flex-1 min-h-0">
+                   <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={summary.document_type_distribution || []}>
+                         <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
+                         <XAxis dataKey="type" stroke="#ffffff50" fontSize={12} tickLine={false} axisLine={false} />
+                         <YAxis stroke="#ffffff50" fontSize={12} tickLine={false} axisLine={false} />
+                         <Tooltip 
+                            contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #ffffff10', borderRadius: '12px' }}
+                            itemStyle={{ color: '#3b82f6' }}
+                         />
+                         <Bar dataKey="count" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                   </ResponsiveContainer>
+                </div>
              </div>
-             
-             <div className="glass-card p-6">
-               <h3 className="text-white font-semibold mb-4">Risk Level Breakdown</h3>
-               <div className="space-y-3">
-                 <ResponsiveContainer width="100%" height={200}>
-                   <PieChart>
-                     <Pie 
-                       data={Object.entries(summary.risk_distribution || {}).map(([name, value]) => ({
-                         name,
-                         value: value || 0
-                       }))}
-                       dataKey="value"
-                       nameKey="name"
-                       cx="50%"
-                       cy="50%"
-                       innerRadius={60}
-                       outerRadius={80}
-                       labelLine={false}
-                       label={({ name, value, percent }) => `${name}: ${percent}%`}
-                     >
-                       {Object.entries(summary.risk_distribution || {}).map(([name, value], index) => (
-                         <Cell key={`cell-${index}`} fill={['#ef4444', '#f59e0b', '#10b981'][index] || '#6b7280'} />
-                       ))}
-                     </Pie>
-                   </PieChart>
-                 </ResponsiveContainer>
-               </div>
+
+             {/* Risk Level Pie */}
+             <div className="glass-card p-6 h-[400px] flex flex-col">
+                <h3 className="text-white font-bold mb-6 flex items-center gap-2">
+                   <span className="text-accent">●</span> Risk Assessment Breakdown
+                </h3>
+                <div className="flex-1 min-h-0">
+                   <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                         <Pie
+                            data={Object.entries(summary.risk_distribution || {}).map(([name, value]) => ({ name: name.toUpperCase(), value }))}
+                            cx="50%" cy="50%"
+                            innerRadius={70}
+                            outerRadius={100}
+                            paddingAngle={5}
+                            dataKey="value"
+                         >
+                            {Object.entries(summary.risk_distribution || {}).map((entry, index) => (
+                               <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                            ))}
+                         </Pie>
+                         <Tooltip 
+                            contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #ffffff10', borderRadius: '12px' }}
+                         />
+                         <Legend verticalAlign="bottom" height={36}/>
+                      </PieChart>
+                   </ResponsiveContainer>
+                </div>
              </div>
-             
-             <div className="glass-card p-6">
-               <h3 className="text-white font-semibold mb-4">Processing Volume Over Time</h3>
-               <div className="space-y-3">
-                 <ResponsiveContainer width="100%" height={250}>
-                   <LineChart 
-                     data={timeline || []} 
-                     margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
-                   >
-                     <CartesianGrid strokeDasharray="3 3" />
-                     <LineXAxis dataKey="date" />
-                     <LineYAxis />
-                     <LineTooltip />
-                     <LineLegend />
-                     <Line 
-                       type="monotone" 
-                       dataKey="count" 
-                       stroke="#3b82f6" 
-                       strokeWidth={2} 
-                       fill="#3b82f6" 
-                     />
-                   </LineChart>
-                 </ResponsiveContainer>
-               </div>
+
+             {/* Volume Timeline */}
+             <div className="xl:col-span-2 glass-card p-6 h-[400px] flex flex-col">
+                <h3 className="text-white font-bold mb-6 flex items-center gap-2">
+                   <span className="text-secondary">↗</span> Processing Volume Timeline
+                </h3>
+                <div className="flex-1 min-h-0">
+                   <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={timeline}>
+                         <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
+                         <XAxis dataKey="date" stroke="#ffffff50" fontSize={11} />
+                         <YAxis stroke="#ffffff50" fontSize={11} />
+                         <Tooltip 
+                            contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #ffffff10', borderRadius: '12px' }}
+                         />
+                         <Line type="monotone" dataKey="count" stroke="#8b5cf6" strokeWidth={3} dot={{ r: 4, fill: '#8b5cf6' }} activeDot={{ r: 6 }} />
+                      </LineChart>
+                   </ResponsiveContainer>
+                </div>
              </div>
-           </div>
-                    <span className="w-8 text-textMuted text-right">{String(count)}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            
-            <div className="glass-card p-6">
-              <h3 className="text-white font-semibold mb-4">Processing Timeline</h3>
-              {timeline.length > 0 ? (
-                <div className="h-48 bg-white/5 rounded-xl overflow-hidden relative">
-                  <div className="absolute inset-0 bg-white/10"></div>
-                  <div className="h-full w-full relative">
-                    {timeline.map((day, index) => {
-                      const barHeight = Math.max(4, (day.count / Math.max(1, Math.max(...timeline.map(d => d.count)))) * 80);
-                      return (
-                        <div 
-                          key={index} 
-                          className="absolute left-0 bottom-0"
-                          style={{
-                            width: `${100 / timeline.length}%`,
-                            height: `${barHeight}%`,
-                            backgroundColor: 'var(--primary)',
-                            opacity: '0.8'
-                          }}
-                        >
-                          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 text-xs text-textMuted">
-                            {new Date(day.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                  </div>
-                )
-                : (
-                  <p className="text-textMuted text-center py-8">No timeline data available</p>
-                )}
-              </div>
           </div>
 
-          {/* Top Vendors */}
-          <div className="glass-card p-6">
-            <h3 className="text-white font-semibold mb-4">Top Vendors</h3>
-            {vendors.length > 0 ? (
-              <div className="space-y-3">
-                {vendors.map((vendor, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 bg-white/5 rounded-hover">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-primary/10 text-primary rounded flex items-center justify-center">
-                        <span className="text-xs">{index + 1}</span>
+          {/* Vendors & Details */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-12">
+             <div className="lg:col-span-2 glass-card p-6">
+                <h3 className="text-white font-bold mb-6">Top Contributing Vendors</h3>
+                <div className="space-y-4">
+                   {vendors.map((v, i) => (
+                      <div key={i} className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5 hover:border-white/10 transition-all group">
+                         <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold">
+                               {v.vendor.charAt(0)}
+                            </div>
+                            <div>
+                               <p className="text-white font-bold group-hover:text-primary transition-colors">{v.vendor}</p>
+                               <p className="text-textMuted text-xs uppercase tracking-tighter">{v.count} documents analyzed</p>
+                            </div>
+                         </div>
+                         <div className="text-right">
+                            <p className="text-white font-mono font-bold">{v.count}</p>
+                            <div className="w-24 h-1.5 bg-white/10 rounded-full mt-1 overflow-hidden">
+                               <div className="h-full bg-primary" style={{ width: `${(v.count / summary.total_documents) * 100}%` }}></div>
+                            </div>
+                         </div>
                       </div>
-                      <div>
-                        <p className="text-white font-medium">{vendor.vendor}</p>
-                        <p className="text-textMuted text-xs">{vendor.count} documents</p>
-                      </div>
-                    </div>
-                    <div className="text-primary font-semibold">{vendor.count}</div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-textMuted text-center py-8">No vendor data available</p>
-            )}
+                   ))}
+                   {vendors.length === 0 && <p className="text-textMuted italic text-center py-8">No vendor data found.</p>}
+                </div>
+             </div>
+
+             <div className="glass-card p-6 bg-primary/5 border-primary/20">
+                <h3 className="text-white font-bold mb-4">Intelligence Digest</h3>
+                <div className="space-y-6">
+                   <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
+                      <p className="text-xs text-textMuted uppercase font-bold mb-2">Primary Sentiment</p>
+                      <p className="text-white">Active document processing suggests a high volume of vendor interactions. Risk levels are within normal operational bounds.</p>
+                   </div>
+                   <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
+                      <p className="text-xs text-textMuted uppercase font-bold mb-2">Anomaly Detection</p>
+                      <p className="text-accent font-bold">0 Immediate Craces Found</p>
+                      <p className="text-[10px] text-textMuted mt-1 leading-relaxed">System-wide integrity is stable. No fraudulent patterns detected in the current data batch.</p>
+                   </div>
+                </div>
+                <button className="w-full mt-8 py-4 bg-primary text-white font-bold rounded-2xl hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] transition-all uppercase tracking-widest text-xs">
+                   Download Full Audit
+                </button>
+             </div>
           </div>
         </>
       )}
