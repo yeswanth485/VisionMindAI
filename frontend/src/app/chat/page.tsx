@@ -54,7 +54,8 @@ function ChatContent() {
       });
       
       if (!response.ok) {
-        throw new Error('Failed to get response from AI');
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Neural Engine failed to respond.');
       }
       
       const data = await response.json();

@@ -31,12 +31,18 @@ except Exception as e:
 
 
 async def create_embedding(text: str) -> List[float]:
-    """Create embedding using OpenAI text-embedding-3-small"""
-    response = await client.embeddings.create(
-        model="text-embedding-3-small",
-        input=text
-    )
-    return response.data[0].embedding
+    """Create embedding using OpenAI text-embedding-3-small via OpenRouter"""
+    try:
+        response = await client.embeddings.create(
+            model="openai/text-embedding-3-small",
+            input=text
+        )
+        return response.data[0].embedding
+    except Exception as e:
+        print(f"Embedding error: {e}")
+        # Return a zero-vector fallback if embedding fails to prevent total crash
+        # This allows the chat to still work as a general assistant
+        return [0.0] * 1536
 
 
 async def store_embedding(document_id: uuid.UUID, text: str) -> str:
@@ -96,7 +102,7 @@ async def generate_rag_answer(query: str, context_docs: List[Dict[str, Any]], mo
     if model == "general":
         # General assistant mode - use only general knowledge, ignore document context
         response = await client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model="openai/gpt-3.5-turbo",
             messages=[
                 {
                     "role": "system",

@@ -45,7 +45,7 @@ class DocumentPipeline:
     
     async def ocr_extract(self, images: list) -> str:
         """
-        Extract text from images using GPT-4o-mini Vision
+        Extract text from images using GPT-4o-mini Vision via OpenRouter
         """
         full_text = ""
         
@@ -57,10 +57,10 @@ class DocumentPipeline:
             img_buffer.seek(0)
             img_base64 = base64.b64encode(img_buffer.read()).decode('utf-8')
             
-            # Call GPT-4o-mini Vision API
+            # Call GPT-4o-mini Vision API (with OpenRouter prefix)
             try:
                 response = await self.openai_client.chat.completions.create(
-                    model="gpt-4o-mini",
+                    model="openai/gpt-4o-mini",
                     messages=[
                         {
                             "role": "user",
@@ -92,11 +92,11 @@ class DocumentPipeline:
     
     async def classify_document(self, text: str) -> str:
         """
-        Use OpenAI to classify document type
+        Use OpenAI to classify document type via OpenRouter
         """
         try:
             response = await self.openai_client.chat.completions.create(
-                model="gpt-3.5-turbo",
+                model="openai/gpt-3.5-turbo",
                 messages=[
                     {
                         "role": "system",
@@ -117,7 +117,7 @@ class DocumentPipeline:
     
     async def extract_structured_data(self, text: str, doc_type: str) -> Dict[str, Any]:
         """
-        Use OpenAI to extract structured data based on document type
+        Use OpenAI to extract structured data via OpenRouter
         """
         try:
             # Define extraction prompts based on document type
@@ -134,7 +134,7 @@ class DocumentPipeline:
             prompt = prompts.get(doc_type, prompts["other"])
             
             response = await self.openai_client.chat.completions.create(
-                model="gpt-3.5-turbo",
+                model="openai/gpt-3.5-turbo",
                 messages=[
                     {
                         "role": "system",
@@ -164,11 +164,11 @@ class DocumentPipeline:
     
     async def validate_data(self, structured_data: Dict[str, Any], doc_type: str) -> Dict[str, Any]:
         """
-        Use OpenAI to validate extracted data
+        Use OpenAI to validate extracted data via OpenRouter
         """
         try:
             response = await self.openai_client.chat.completions.create(
-                model="gpt-3.5-turbo",
+                model="openai/gpt-3.5-turbo",
                 messages=[
                     {
                         "role": "system",
@@ -206,11 +206,11 @@ class DocumentPipeline:
     
     async def generate_insights(self, structured_data: Dict[str, Any], doc_type: str) -> Dict[str, Any]:
         """
-        Use OpenAI to generate insights and summary
+        Use OpenAI to generate insights via OpenRouter
         """
         try:
             response = await self.openai_client.chat.completions.create(
-                model="gpt-3.5-turbo",
+                model="openai/gpt-3.5-turbo",
                 messages=[
                     {
                         "role": "system",
@@ -257,11 +257,11 @@ class DocumentPipeline:
     
     async def make_decision(self, structured_data: Dict[str, Any], validation: Dict[str, Any], insights: Dict[str, Any], doc_type: str) -> Dict[str, Any]:
         """
-        Use OpenAI to make decisions and provide risk levels/recommendations
+        Use OpenAI to make decisions via OpenRouter
         """
         try:
             response = await self.openai_client.chat.completions.create(
-                model="gpt-3.5-turbo",
+                model="openai/gpt-3.5-turbo",
                 messages=[
                     {
                         "role": "system",
