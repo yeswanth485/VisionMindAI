@@ -1,3 +1,4 @@
+import logging
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
@@ -33,4 +34,16 @@ async def chat_with_documents(request: ChatRequest):
         return ChatResponse(**result)
         
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Chat processing failed: {str(e)}")
+        import traceback
+        logging.error(f"Chat Error: {str(e)}")
+        logging.error(traceback.format_exc())
+        
+        # Determine if it's an API error or retrieval error
+        error_type = "AI Service Timeout" if "timeout" in str(e).lower() else "Retrieval Failure"
+        if "api_key" in str(e).lower():
+            error_type = "AI Authentication Error"
+            
+        raise HTTPException(
+            status_code=500, 
+            detail=f"{error_type}: {str(e)}"
+        )

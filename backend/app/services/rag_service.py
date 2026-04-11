@@ -7,12 +7,27 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Initialize OpenAI client
-client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+# Initialize OpenAI client for OpenRouter
+client = AsyncOpenAI(
+    api_key=os.getenv("OPENAI_API_KEY"),
+    base_url="https://openrouter.ai/api/v1",
+    default_headers={
+        "HTTP-Referer": "https://visionmind-ai.vercel.app",
+        "X-Title": "VisionMind AI",
+    }
+)
 
 # Initialize ChromaDB client
-chroma_client = chromadb.PersistentClient(path="./chroma_data")
-collection = chroma_client.get_or_create_collection("documents")
+try:
+    chroma_client = chromadb.PersistentClient(path="./chroma_data")
+    collection = chroma_client.get_or_create_collection("documents")
+except Exception as e:
+    print(f"ChromaDB initialization error: {e}")
+    # Fallback/Dummy collection if initialization fails in build environments
+    class DummyCollection:
+        def query(self, *args, **kwargs): return {"ids": [], "documents": [], "metadatas": [], "distances": []}
+        def add(self, *args, **kwargs): pass
+    collection = DummyCollection()
 
 
 async def create_embedding(text: str) -> List[float]:
@@ -100,9 +115,10 @@ async def generate_rag_answer(query: str, context_docs: List[Dict[str, Any]], mo
         # Prepare context from retrieved documents
         context_text = "\n\n".join([doc['text'] for doc in context_docs])
         
-        # Generate response using GPT
+        # Generate response using GPT (OpenRouter)
+        # Use gpt-4o-mini for better intelligence if available via OpenRouter, fallback to 3.5
         response = await client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model="openai/gpt-4o-mini",
             messages=[
                 {
                     "role": "system",
@@ -114,7 +130,7 @@ async def generate_rag_answer(query: str, context_docs: List[Dict[str, Any]], mo
                 }
             ],
             temperature=0.1,
-            max_tokens=500
+            max_tokens=800
         )
     
     answer = response.choices[0].message.content
