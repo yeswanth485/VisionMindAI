@@ -82,23 +82,33 @@ export default function DocumentResultPage({ params }: { params: { id: string } 
           </div>
         </div>
         
-        <div className="flex items-center gap-3">
-          {isProcessing && (
-            <div className="flex items-center gap-3 px-5 py-2.5 glass rounded-2xl border-primary/30 text-primary shadow-[0_0_20px_rgba(59,130,246,0.15)]">
-              <div className="w-5 h-5 rounded-full border-2 border-primary border-t-transparent animate-spin"></div>
-              <span className="font-bold tracking-wide">ANALYZING DOCUMENT...</span>
-            </div>
-          )}
-          {doc?.status === 'completed' && (
-            <div className="flex items-center gap-2 px-5 py-2.5 glass rounded-2xl border-accent/40 text-accent shadow-[0_0_20px_rgba(16,185,129,0.15)]">
-              <span className="w-2.5 h-2.5 rounded-full bg-accent animate-pulse"></span>
-              <span className="font-bold tracking-wide">ANALYSIS COMPLETE</span>
-            </div>
-          )}
-          <Link href="/" className="px-5 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl text-white font-medium transition-all">
-             + New Upload
-          </Link>
-        </div>
+         <div className="flex items-center gap-3">
+           {isProcessing && (
+             <div className="flex items-center gap-3 px-5 py-2.5 glass rounded-2xl border-primary/30 text-primary shadow-[0_0_20px_rgba(59,130,246,0.15)]">
+               <div className="w-5 h-5 rounded-full border-2 border-primary border-t-transparent animate-spin"></div>
+               <span className="font-bold tracking-wide">ANALYZING DOCUMENT...</span>
+             </div>
+           )}
+           {doc?.status === 'completed' && (
+             <div className="flex items-center gap-2 px-5 py-2.5 glass rounded-2xl border-accent/40 text-accent shadow-[0_0_20px_rgba(16,185,129,0.15)]">
+               <span className="w-2.5 h-2.5 rounded-full bg-accent animate-pulse"></span>
+               <span className="font-bold tracking-wide">ANALYSIS COMPLETE</span>
+             </div>
+           )}
+           <div className="flex space-x-2">
+             <Link href="/" className="px-5 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl text-white font-medium transition-all">
+                + New Upload
+             </Link>
+             <button 
+               onClick={() => {
+                 window.location.href = `/chat?docId=${params.id}`;
+               }}
+               className="px-5 py-2.5 bg-primary/20 hover:bg-primary text-primary border border-primary/30 rounded-2xl font-medium transition-all"
+             >
+               💬 Chat with this File
+             </button>
+           </div>
+         </div>
       </header>
 
       {isProcessing && (

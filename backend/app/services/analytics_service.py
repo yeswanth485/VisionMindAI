@@ -156,7 +156,11 @@ def get_analytics_summary() -> Dict[str, Any]:
         "total_documents": doc_stats["total_documents"],
         "total_invoices": doc_stats["by_type"].get("invoice", 0),
         "total_amount_processed": _get_total_amount(),
-        "risk_distribution": get_risk_distribution()
+        "risk_distribution": get_risk_distribution(),
+        "document_type_distribution": [
+            {"type": doc_type, "count": count} 
+            for doc_type, count in doc_stats["by_type"].items()
+        ]
     }
     
     return result

@@ -2,8 +2,8 @@ import os
 import asyncio
 import io
 import uuid
+import base64
 from typing import Dict, Any, Optional
-import pytesseract
 from pdf2image import convert_from_bytes
 from PIL import Image
 import openai
@@ -45,17 +45,49 @@ class DocumentPipeline:
     
     async def ocr_extract(self, images: list) -> str:
         """
-        Extract text from images using pytesseract OCR
+        Extract text from images using GPT-4o-mini Vision
         """
         full_text = ""
         
-        def _extract(img):
-            return pytesseract.image_to_string(img)
-
+        # Process each image with GPT-4o-mini Vision
         for image in images:
-            # Run OCR in a separate thread to prevent blocking event loop
-            text = await asyncio.to_thread(_extract, image)
-            full_text += text + "\n"
+            # Convert PIL image to base64
+            img_buffer = io.BytesIO()
+            image.save(img_buffer, format='PNG')
+            img_buffer.seek(0)
+            img_base64 = base64.b64encode(img_buffer.read()).decode('utf-8')
+            
+            # Call GPT-4o-mini Vision API
+            try:
+                response = await self.openai_client.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=[
+                        {
+                            "role": "user",
+                            "content": [
+                                {
+                                    "type": "text",
+                                    "text": "Extract all text from this image. Preserve the original layout and formatting as much as possible. Return only the extracted text without any additional commentary."
+                                },
+                                {
+                                    "type": "image_url",
+                                    "image_url": {
+                                        "url": f"data:image/png;base64,{img_base64}"
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                    max_tokens=4000
+                )
+                
+                text = response.choices[0].message.content.strip()
+                full_text += text + "\n"
+            except Exception as e:
+                print(f"Vision API error: {e}")
+                # Fallback to empty string for this image
+                full_text += "\n"
+                
         return full_text.strip()
     
     async def classify_document(self, text: str) -> str:

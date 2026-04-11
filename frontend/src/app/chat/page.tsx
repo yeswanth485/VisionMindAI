@@ -1,17 +1,28 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useSearchParams } from 'react';
 
 export default function ChatPage() {
   const [messages, setMessages] = useState<Array<{id: string; content: string; isUser: boolean; sources?: Array<any>}>>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [modelSelector, setModelSelector] = useState<'general' | 'document'>('document');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [docId, setDocId] = useState<string | null>(null);
+  const [searchParams] = useSearchParams();
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  // Handle docId from URL parameters
+  useEffect(() => {
+    const urlDocId = searchParams.get('docId');
+    if (urlDocId) {
+      setDocId(urlDocId);
+    }
+  }, [searchParams]);
 
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,7 +45,11 @@ export default function ChatPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ query: input })
+        body: JSON.stringify({ 
+          query: input,
+          model: modelSelector === 'general' ? 'general' : 'document',
+          docId: docId
+        })
       });
       
       if (!response.ok) {
@@ -66,12 +81,37 @@ export default function ChatPage() {
 
   return (
     <div className="flex flex-col min-h-screen p-6 lg:p-12 animate-fade-in">
-      <header className="mb-8">
-        <h1 className="text-3xl md:text-4xl font-bold mb-2">💬 Document Chat</h1>
-        <p className="text-textMuted text-lg">
-          Ask questions across all your processed documents using AI-powered retrieval
-        </p>
-      </header>
+       <header className="mb-8">
+         <h1 className="text-3xl md:text-4xl font-bold mb-2">💬 Document Chat</h1>
+         <p className="text-textMuted text-lg">
+           Ask questions across all your processed documents using AI-powered retrieval
+         </p>
+         <div className="flex items-center space-x-4 mt-4">
+           <span className="text-textMuted">AI Model:</span>
+           <div className="flex space-x-2">
+             <button 
+               onClick={() => setModelSelector('general')}
+               className={`px-3 py-1 rounded-full text-xs font-medium ${
+                 modelSelector === 'general' 
+                   ? 'bg-primary text-white' 
+                   : 'bg-white/10 text-white border border-white/20 hover:bg-white/20'
+               }`}
+             >
+               General Assistant
+             </button>
+             <button 
+               onClick={() => setModelSelector('document')}
+               className={`px-3 py-1 rounded-full text-xs font-medium ${
+                 modelSelector === 'document' 
+                   ? 'bg-primary text-white' 
+                   : 'bg-white/10 text-white border border-white/20 hover:bg-white/20'
+               }`}
+             >
+               Document Intelligence
+             </button>
+           </div>
+         </div>
+       </header>
 
       <div className="flex-1 overflow-hidden">
         <div className="flex-1 overflow-y-auto p-4 space-y-4">

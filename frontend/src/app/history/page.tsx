@@ -84,10 +84,24 @@ export default function HistoryPage() {
                     {doc.id.substring(0, 18)}...
                   </p>
                   
-                  <div className="flex items-center justify-between border-t border-white/5 pt-4">
-                    <span className="text-[10px] text-textMuted">
-                      {new Date(doc.created_at).toLocaleDateString()} • {new Date(doc.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </span>
+                   <div className="flex items-center justify-between border-t border-white/5 pt-4">
+                     <span className="text-[10px] text-textMuted">
+                       {new Date(doc.created_at).toLocaleDateString()} • {new Date(doc.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                     </span>
+                     <div className="flex space-x-2">
+                       <span className="text-primary text-xs font-medium group-hover:translate-x-1 transition-transform">
+                         View Report →
+                       </span>
+                       <button 
+                         onClick={() => {
+                           window.location.href = `/chat?docId=${doc.id}`;
+                         }}
+                         className="px-3 py-1 rounded-full bg-primary/20 text-primary border border-primary/30 hover:bg-primary hover:text-white transition-all"
+                       >
+                         💬 Chat
+                       </button>
+                     </div>
+                   </div>
                     <span className="text-primary text-xs font-medium group-hover:translate-x-1 transition-transform">
                       View Report →
                     </span>

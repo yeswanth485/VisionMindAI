@@ -1,6 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { PieChart, Pie, Cell } from 'recharts';
+import { LineChart, Line, XAxis as LineXAxis, YAxis as LineYAxis, Tooltip as LineTooltip, Legend as LineLegend, CartesianGrid } from 'recharts';
 
 export default function AnalyticsPage() {
   const [summary, setSummary] = useState<any>(null);
@@ -161,20 +164,76 @@ export default function AnalyticsPage() {
             </div>
           </div>
 
-          {/* Charts Section */}
-          <div className="grid gap-6 mb-8">
-            <div className="glass-card p-6">
-              <h3 className="text-white font-semibold mb-4">Risk Distribution</h3>
-              <div className="space-y-3">
-                {summary.risk_distribution && Object.entries(summary.risk_distribution).map(([level, count]: [string, any]) => (
-                  <div key={level} className="flex items-center">
-                    <span className="w-3 h-3 rounded-full" 
-                      style={{ backgroundColor: level === 'high' ? '#ef4444' : level === 'medium' ? '#f59e0b' : '#ec4899' }}></span>
-                    <span className="flex-1 text-textMuted">{level}</span>
-                    <div className="w-24 bg-white/5 rounded-full relative">
-                      <div className="h-2 rounded-full" 
-                        style={{ backgroundColor: level === 'high' ? '#ef4444' : level === 'medium' ? '#f59e0b' : '#ec4899', width: `${count * 20}%` }}></div>
-                    </div>
+           {/* Charts Section */}
+           <div className="grid gap-6 mb-8">
+             <div className="glass-card p-6">
+               <h3 className="text-white font-semibold mb-4">Document Type Distribution</h3>
+               <div className="space-y-3">
+                 <ResponsiveContainer width="100%" height={200}>
+                   <BarChart data={summary.document_type_distribution || []}>
+                     <XAxis dataKey="type" />
+                     <YAxis />
+                     <Tooltip />
+                     <Legend />
+                     <Bar dataKey="count" fill="#3b82f6" />
+                   </BarChart>
+                 </ResponsiveContainer>
+               </div>
+             </div>
+             
+             <div className="glass-card p-6">
+               <h3 className="text-white font-semibold mb-4">Risk Level Breakdown</h3>
+               <div className="space-y-3">
+                 <ResponsiveContainer width="100%" height={200}>
+                   <PieChart>
+                     <Pie 
+                       data={Object.entries(summary.risk_distribution || {}).map(([name, value]) => ({
+                         name,
+                         value: value || 0
+                       }))}
+                       dataKey="value"
+                       nameKey="name"
+                       cx="50%"
+                       cy="50%"
+                       innerRadius={60}
+                       outerRadius={80}
+                       labelLine={false}
+                       label={({ name, value, percent }) => `${name}: ${percent}%`}
+                     >
+                       {Object.entries(summary.risk_distribution || {}).map(([name, value], index) => (
+                         <Cell key={`cell-${index}`} fill={['#ef4444', '#f59e0b', '#10b981'][index] || '#6b7280'} />
+                       ))}
+                     </Pie>
+                   </PieChart>
+                 </ResponsiveContainer>
+               </div>
+             </div>
+             
+             <div className="glass-card p-6">
+               <h3 className="text-white font-semibold mb-4">Processing Volume Over Time</h3>
+               <div className="space-y-3">
+                 <ResponsiveContainer width="100%" height={250}>
+                   <LineChart 
+                     data={timeline || []} 
+                     margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
+                   >
+                     <CartesianGrid strokeDasharray="3 3" />
+                     <LineXAxis dataKey="date" />
+                     <LineYAxis />
+                     <LineTooltip />
+                     <LineLegend />
+                     <Line 
+                       type="monotone" 
+                       dataKey="count" 
+                       stroke="#3b82f6" 
+                       strokeWidth={2} 
+                       fill="#3b82f6" 
+                     />
+                   </LineChart>
+                 </ResponsiveContainer>
+               </div>
+             </div>
+           </div>
                     <span className="w-8 text-textMuted text-right">{String(count)}</span>
                   </div>
                 ))}

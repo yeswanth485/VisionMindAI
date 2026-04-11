@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
+import { documentAPI } from '@/services/api';
 
 export default function BatchUploadPage() {
   const [isDragging, setIsDragging] = useState(false);
@@ -35,68 +36,63 @@ export default function BatchUploadPage() {
     }
   };
 
-  const handleFiles = (files: FileList | File[]) => {
-    const fileArray = Array.from(files);
-    // Limit to 10 files
-    const limitedFiles = fileArray.slice(0, 10);
-    
-    // Initialize progress for each file
-    const initialProgress = limitedFiles.map(file => ({
-      id: Math.random().toString(36).substr(2, 9),
-      name: file.name,
-      progress: 0,
-      status: 'pending' as const
-    }));
-    
-    setUploadProgress(initialProgress);
-    setError(null);
-    
-    // Process each file
-    limitedFiles.forEach((file, index) => {
-      // Simulate upload progress (in real app, this would be actual upload)
-      const fileId = uploadProgress[index].id;
-      
-      // Update status to uploading
-      setUploadProgress(prev => 
-        prev.map(p => 
-          p.id === fileId ? {...p, status: 'uploading', progress: 10} : p
-        )
-      );
-      
-      // Simulate progress
-      const progressInterval = setInterval(() => {
-        setUploadProgress(prev => {
-          return prev.map(p => {
-            if (p.id === fileId) {
-              let newProgress = Math.min(p.progress + 10, 90);
-              return {...p, progress: newProgress};
-            }
-            return p;
-          });
-        });
-      }, 200);
-      
-      // Complete after a delay
-      setTimeout(() => {
-        clearInterval(progressInterval);
-        setUploadProgress(prev => 
-          prev.map(p => 
-            p.id === fileId ? {...p, progress: 100, status: 'success'} : p
-          )
-        );
-        
-        // Check if all files are done
-        setTimeout(() => {
-          const allDone = uploadProgress.every(p => p.status === 'success' || p.status === 'error');
-          if (allDone) {
-            setIsUploading(false);
-          }
-        }, 500);
-      }, 2000 + Math.random() * 1000); // Random delay for realism
-    });
-    
-    setIsUploading(true);
-  };
+   const handleFiles = async (files: FileList | File[]) => {
+     const fileArray = Array.from(files);
+     // Limit to 10 files
+     const limitedFiles = fileArray.slice(0, 10);
+     
+     // Initialize progress for each file
+     const initialProgress = limitedFiles.map(file => ({
+       id: Math.random().toString(36).substr(2, 9),
+       name: file.name,
+       progress: 0,
+       status: 'pending' as const
+     }));
+     
+     setUploadProgress(initialProgress);
+     setError(null);
+     
+     // Process each file
+     for (let i = 0; i < limitedFiles.length; i++) {
+       const file = limitedFiles[i];
+       const fileId = uploadProgress[i].id;
+       
+       // Update status to uploading
+       setUploadProgress(prev => 
+         prev.map(p => 
+           p.id === fileId ? {...p, status: 'uploading', progress: 10} : p
+         )
+       );
+       
+       try {
+         // Upload file to backend
+         const response = await documentAPI.upload(file);
+         
+         // Update progress to 100% on success
+         setUploadProgress(prev => 
+           prev.map(p => 
+             p.id === fileId ? {...p, progress: 100, status: 'success'} : p
+           )
+         );
+       } catch (error) {
+         console.error('Upload error:', error);
+         // Update status to error
+         setUploadProgress(prev => 
+           prev.map(p => 
+             p.id === fileId ? {...p, progress: 0, status: 'error'} : p
+           )
+         );
+       }
+     }
+     
+     // Check if all files are done
+     const allDone = uploadProgress.every(p => p.status === 'success' || p.status === 'error');
+     if (allDone) {
+       setIsUploading(false);
+     } else {
+       setIsUploading(true);
+     }
+   };
 
   const handleRetry = () => {
     // Reset and retry
@@ -142,13 +138,13 @@ export default function BatchUploadPage() {
           onDrop={handleDrop}
           onClick={() => !isUploading && fileInputRef.current?.click()}
         >
-          <input 
-            type="file" 
-            ref={fileInputRef} 
-            multiple
-            accept=".pdf,.png,.jpg,.jpeg,.tiff,.bmp"
-            className="hidden"
-          />
+<input 
+             type="file" 
+             ref={fileInputRef} 
+             multiple
+             accept=".pdf,.png,.jpg,.jpeg,.tiff,.bmp,.json"
+             className="hidden"
+           />
           
           {isUploading ? (
             <div className="flex flex-col items-center justify-center py-8">
