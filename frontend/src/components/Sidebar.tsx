@@ -12,6 +12,8 @@ export default function Sidebar() {
     { name: 'Chat', href: '/chat', icon: '💬' },
     { name: 'Analytics', href: '/analytics', icon: '📈' },
     { name: 'Batch Upload', href: '/batch', icon: '📤' },
+    { name: 'Studio', href: '/studio', icon: '🎥' },
+    { name: 'Agent', href: '/agent', icon: '🤖' },
     { name: 'Settings', href: '/settings', icon: '⚙️' },
   ];
 
