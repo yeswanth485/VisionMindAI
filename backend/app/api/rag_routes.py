@@ -24,14 +24,8 @@ async def chat_with_documents(request: ChatRequest):
         # Determine search scope based on model selection
         similar_docs = []
         if request.model == "document":
-            # Search for similar documents when in document mode
-            similar_docs = await search_similar(request.query, top_k=5)
-            
-            # If a specific document ID is provided, prioritize it
-            if request.docId:
-                # We could filter or boost the specific document here
-                # For now, we'll just note that we're focusing on this document
-                pass
+            # Search for similar documents when in document mode, scoped to docId if provided
+            similar_docs = await search_similar(request.query, top_k=5, doc_id=request.docId)
         
         # Generate answer using retrieved context
         result = await generate_rag_answer(request.query, similar_docs, request.model)

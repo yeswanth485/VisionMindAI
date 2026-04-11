@@ -39,13 +39,17 @@ async def store_embedding(document_id: uuid.UUID, text: str) -> str:
     return chroma_id
 
 
-async def search_similar(query: str, top_k: int = 5) -> List[Dict[str, Any]]:
-    """Search for similar documents in ChromaDB"""
+async def search_similar(query: str, top_k: int = 5, doc_id: str = None) -> List[Dict[str, Any]]:
+    """Search for similar documents in ChromaDB, optionally filtered by doc_id"""
     query_embedding = await create_embedding(query)
+    
+    # Configure where filter if doc_id is provided
+    where_filter = {"document_id": doc_id} if doc_id else None
     
     results = collection.query(
         query_embeddings=[query_embedding],
         n_results=top_k,
+        where=where_filter,
         include=["documents", "metadatas", "distances"]
     )
     
