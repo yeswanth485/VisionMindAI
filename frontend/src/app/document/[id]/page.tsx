@@ -51,7 +51,13 @@ export default function DocumentResultPage({ params }: { params: { id: string } 
 
   const isProcessing = !doc || doc.status === 'processing' || doc.status === 'pending';
   const isFailed = doc?.status === 'failed';
-  const isResume = doc?.doc_type === 'resume';
+  
+  // Robust Resume Detection (handles variations from AI output)
+  const docTypeLower = doc?.doc_type?.toLowerCase() || '';
+  const isResume = docTypeLower === 'resume' || 
+                   docTypeLower.includes('curriculum') || 
+                   docTypeLower.includes('cv') ||
+                   docTypeLower.includes('bio-data');
 
   return (
     <div className="p-6 md:p-10 min-h-full flex flex-col animate-fade-in relative">
@@ -68,11 +74,23 @@ export default function DocumentResultPage({ params }: { params: { id: string } 
       <header className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
           <div className="flex items-center gap-4 mb-2">
-            <h1 className="text-3xl md:text-5xl font-black text-white tracking-tighter uppercase">
-              {isResume ? 'ATS SCANNER' : 'INTELLIGENCE'} <span className="text-primary italic">{isResume ? 'PROFILE' : 'REPORT'}</span>
+            <h1 className="text-3xl md:text-5xl font-black text-white tracking-tighter uppercase transition-all">
+              {isResume ? (
+                <span className="flex items-center gap-4">
+                  <span className="text-accent">NEURAL ATS</span>
+                  <span className="text-primary italic">SCANNER</span>
+                </span>
+              ) : (
+                <span className="flex items-center gap-4">
+                  <span>INTELLIGENCE</span>
+                  <span className="text-primary italic">REPORT</span>
+                </span>
+              )}
             </h1>
-            {doc?.doc_type && doc.doc_type !== 'other' && (
-              <span className="px-4 py-1.5 text-xs font-bold bg-primary/20 text-primary border border-primary/30 rounded-full uppercase tracking-widest shadow-[0_0_15px_rgba(59,130,246,0.2)]">
+            {doc?.doc_type && (
+              <span className={`px-4 py-1.5 text-xs font-bold border rounded-full uppercase tracking-widest transition-all shadow-[0_0_15px_rgba(59,130,246,0.1)] ${
+                isResume ? 'bg-accent/20 text-accent border-accent/30' : 'bg-primary/20 text-primary border-primary/30'
+              }`}>
                 {doc.doc_type.replace('_', ' ')}
               </span>
             )}
@@ -90,7 +108,9 @@ export default function DocumentResultPage({ params }: { params: { id: string } 
                 onClick={() => {
                   window.location.href = `/chat?docId=${params.id}`;
                 }}
-                className="px-8 py-3 bg-primary text-white rounded-2xl font-bold shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all uppercase tracking-widest text-xs"
+                className={`px-8 py-3 text-white rounded-2xl font-bold shadow-lg transition-all uppercase tracking-widest text-xs ${
+                  isResume ? 'bg-accent hover:shadow-accent/40' : 'bg-primary hover:shadow-primary/40'
+                }`}
               >
                 💬 {isResume ? 'RESUME AI COACH' : 'NEURAL CHAT'}
             </button>
@@ -303,11 +323,13 @@ export default function DocumentResultPage({ params }: { params: { id: string } 
                              <span className="text-[10px] leading-relaxed font-bold">{rec}</span>
                           </div>
                        ))}
-                       {isResume && doc?.insights?.missing_impact_keywords?.length > 0 && (
+                       {isResume && (
                           <div className="mt-4 p-4 bg-primary/20 border border-primary/30 rounded-2xl">
                              <p className="text-[10px] font-black text-primary uppercase tracking-widest mb-2">Neural Recommendation for 99%</p>
-                             <p className="text-xs text-white leading-relaxed">
-                                "Include missing impact keywords: {doc.insights.missing_impact_keywords.join(', ')}. This will bridge the logic gap for top-tier enterprise screeners."
+                             <p className="text-sm text-white leading-relaxed">
+                                {doc?.insights?.missing_impact_keywords?.length > 0 
+                                  ? `Include missing impact keywords: ${doc.insights.missing_impact_keywords.join(', ')}. This will bridge the logic gap for top-tier enterprise screeners.`
+                                  : "Optimizing your keywords density... Use the AI Coach to refine specific sections."}
                              </p>
                           </div>
                        )}

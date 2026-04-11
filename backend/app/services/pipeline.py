@@ -94,11 +94,11 @@ class DocumentPipeline:
                 messages=[
                     {
                         "role": "system",
-                        "content": "You are a document classification expert. Classify the document into one of these types: invoice, receipt, contract, id_card, resume, bank_statement, medical_record, or other."
+                        "content": "You are a document classification expert. Classify the document into EXACTLY ONE of these lowercase categories: invoice, receipt, contract, id_card, resume, bank_statement, medical_record, or other. If the document is a CV, Curriculum Vitae, or Professional Profile, you MUST classify it as 'resume'."
                     },
                     {
                         "role": "user",
-                        "content": f"Classify this document text: {text[:2000]}"
+                        "content": f"Classify this document text. If it contains work experience or education, it is likely a 'resume': {text[:3000]}"
                     }
                 ],
                 max_tokens=50,
