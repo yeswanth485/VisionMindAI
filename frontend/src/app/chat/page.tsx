@@ -68,15 +68,15 @@ function ChatContent() {
       };
       
       setMessages(prev => [...prev, botMessage]);
-     } catch (error) {
-       console.error('Chat error:', error);
-       const errorMessage = {
-         id: Math.random().toString(36).substr(2, 9),
-         content: error.message || 'Sorry, I encountered an error. Please try again.',
-         isUser: false
-       };
-       setMessages(prev => [...prev, errorMessage]);
-     } finally {
+      } catch (error: unknown) {
+        console.error('Chat error:', error);
+        const errorMessage = {
+          id: Math.random().toString(36).substr(2, 9),
+          content: error instanceof Error ? error.message : 'Sorry, I encountered an error. Please try again.',
+          isUser: false
+        };
+        setMessages(prev => [...prev, errorMessage]);
+      } finally {
       setLoading(false);
     }
   };
