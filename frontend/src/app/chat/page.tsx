@@ -17,13 +17,25 @@ function ChatContent() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Handle docId from URL parameters
+  // Handle docId from URL parameters and set initial greeting
   useEffect(() => {
     const urlDocId = searchParams.get('docId');
-    if (urlDocId) {
+    
+    // If we have a new docId or it changed
+    if (urlDocId && urlDocId !== docId) {
       setDocId(urlDocId);
+      setModelSelector('document');
+      
+      // Reset messages and add personalized greeting for the specific document
+      setMessages([
+        {
+          id: 'welcome-msg',
+          content: `Hello! I've loaded the intelligence profile for Document #${urlDocId.substring(0, 6)}. I've analyzed all its financial and logistics data. How can I help you extract more insights or verify specific details from this document?`,
+          isUser: false
+        }
+      ]);
     }
-  }, [searchParams]);
+  }, [searchParams, docId]);
 
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,36 +95,46 @@ function ChatContent() {
 
   return (
     <div className="flex flex-col min-h-screen p-6 lg:p-12 animate-fade-in">
-       <header className="mb-8">
-         <h1 className="text-3xl md:text-4xl font-bold mb-2">💬 Document Chat</h1>
-         <p className="text-textMuted text-lg">
-           Ask questions across all your processed documents using AI-powered retrieval
-         </p>
-         <div className="flex items-center space-x-4 mt-4">
-           <span className="text-textMuted text-xs font-bold uppercase tracking-widest">AI Context Profile:</span>
-           <div className="flex p-1 bg-white/5 rounded-full border border-white/10">
-             <button 
-               onClick={() => setModelSelector('general')}
-               className={`px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-tighter transition-all ${
-                 modelSelector === 'general' 
-                   ? 'bg-primary text-white shadow-lg' 
-                   : 'text-textMuted hover:text-white'
-               }`}
-             >
-               General AI Brain
-             </button>
-             <button 
-               onClick={() => setModelSelector('document')}
-               className={`px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-tighter transition-all ${
-                 modelSelector === 'document' 
-                   ? 'bg-primary text-white shadow-lg' 
-                   : 'text-textMuted hover:text-white'
-               }`}
-             >
-               Document Brain
-             </button>
+       <header className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+         <div>
+           <h1 className="text-3xl md:text-4xl font-bold mb-2">💬 Document Chat</h1>
+           <p className="text-textMuted text-lg">
+             {docId 
+               ? `Deep-dive analysis for Document #${docId.substring(0, 8)}` 
+               : "Ask questions across all your processed documents using AI-powered retrieval"}
+           </p>
+           <div className="flex items-center space-x-4 mt-4">
+             <span className="text-textMuted text-xs font-bold uppercase tracking-widest">AI Context Profile:</span>
+             <div className="flex p-1 bg-white/5 rounded-full border border-white/10">
+               <button 
+                 onClick={() => setModelSelector('general')}
+                 className={`px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-tighter transition-all ${
+                   modelSelector === 'general' 
+                     ? 'bg-primary text-white shadow-lg' 
+                     : 'text-textMuted hover:text-white'
+                 }`}
+               >
+                 General AI Brain
+               </button>
+               <button 
+                 onClick={() => setModelSelector('document')}
+                 className={`px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-tighter transition-all ${
+                   modelSelector === 'document' 
+                     ? 'bg-primary text-white shadow-lg' 
+                     : 'text-textMuted hover:text-white'
+                 }`}
+               >
+                 {docId ? "Active Document Brain" : "Multi-Doc Brain"}
+               </button>
+             </div>
            </div>
          </div>
+         {docId && (
+           <div className="px-4 py-2 bg-primary/10 border border-primary/20 rounded-2xl flex items-center gap-3">
+             <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+             <span className="text-[10px] font-bold text-primary uppercase tracking-widest">Focusing on {docId.substring(0,8)}</span>
+           </div>
+         )}
        </header>
 
       <div className="flex-1 glass-card p-0 flex flex-col relative overflow-hidden bg-black/20 border-white/5">
