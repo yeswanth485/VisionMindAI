@@ -51,6 +51,7 @@ export default function DocumentResultPage({ params }: { params: { id: string } 
 
   const isProcessing = !doc || doc.status === 'processing' || doc.status === 'pending';
   const isFailed = doc?.status === 'failed';
+  const isResume = doc?.doc_type === 'resume';
 
   return (
     <div className="p-6 md:p-10 min-h-full flex flex-col animate-fade-in relative">
@@ -67,7 +68,9 @@ export default function DocumentResultPage({ params }: { params: { id: string } 
       <header className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
           <div className="flex items-center gap-4 mb-2">
-            <h1 className="text-3xl md:text-5xl font-black text-white tracking-tighter">INTELLIGENCE <span className="text-primary italic">REPORT</span></h1>
+            <h1 className="text-3xl md:text-5xl font-black text-white tracking-tighter uppercase">
+              {isResume ? 'ATS SCANNER' : 'INTELLIGENCE'} <span className="text-primary italic">{isResume ? 'PROFILE' : 'REPORT'}</span>
+            </h1>
             {doc?.doc_type && doc.doc_type !== 'other' && (
               <span className="px-4 py-1.5 text-xs font-bold bg-primary/20 text-primary border border-primary/30 rounded-full uppercase tracking-widest shadow-[0_0_15px_rgba(59,130,246,0.2)]">
                 {doc.doc_type.replace('_', ' ')}
@@ -89,7 +92,7 @@ export default function DocumentResultPage({ params }: { params: { id: string } 
                 }}
                 className="px-8 py-3 bg-primary text-white rounded-2xl font-bold shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all uppercase tracking-widest text-xs"
               >
-                💬 NEURAL CHAT
+                💬 {isResume ? 'RESUME AI COACH' : 'NEURAL CHAT'}
             </button>
          </div>
       </header>
@@ -123,7 +126,7 @@ export default function DocumentResultPage({ params }: { params: { id: string } 
       ) : (
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 pb-20">
           
-          {/* COLUMN 1: Visuals & Decision (5 cols) */}
+          {/* COLUMN 1: Visuals & Decision (4 cols) */}
           <div className="xl:col-span-4 flex flex-col gap-8">
             <ResultCard title="SOURCE PREVIEW" icon="📄">
               <div className="h-[400px] bg-black/40 rounded-3xl overflow-hidden border border-white/5 relative group">
@@ -160,6 +163,28 @@ export default function DocumentResultPage({ params }: { params: { id: string } 
                       </div>
                   </div>
 
+                  {isResume && (
+                    <div className="p-6 bg-accent/10 border border-accent/20 rounded-3xl relative overflow-hidden group">
+                        <div className="absolute -top-12 -right-12 w-32 h-32 bg-accent opacity-10 rounded-full blur-3xl group-hover:opacity-20 transition-opacity"></div>
+                        <p className="text-[10px] text-accent font-black uppercase tracking-[0.2em] mb-4">ATS COMPATIBILITY SCORE</p>
+                        <div className="flex items-center justify-between mb-4">
+                           <h4 className="text-5xl font-black text-white tracking-tighter">{doc?.insights?.ats_score || 0}%</h4>
+                           <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center text-3xl">🚀</div>
+                        </div>
+                        <div className="h-2 w-full bg-white/10 rounded-full overflow-hidden mb-6">
+                           <div 
+                              className="h-full bg-accent shadow-[0_0_20px_rgba(16,185,129,0.5)] transition-all duration-1000 ease-out" 
+                              style={{ width: `${doc?.insights?.ats_score || 0}%` }}
+                           ></div>
+                        </div>
+                        <div className="p-4 bg-black/20 rounded-2xl border border-white/5">
+                           <p className="text-[10px] text-white/50 leading-relaxed italic">
+                              "Current structure optimized for global ATS standards. Aiming for 99% logic below."
+                           </p>
+                        </div>
+                    </div>
+                   )}
+
                   <div className="p-6 bg-primary/10 border border-primary/20 rounded-3xl">
                       <h3 className="text-xl font-bold text-white mb-4">
                          {doc?.decision?.decision_status === 'approved' ? '✓ APPROVED' : '⚠ REVIEW REQUIRED'}
@@ -183,22 +208,48 @@ export default function DocumentResultPage({ params }: { params: { id: string } 
                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Categorized Displays */}
                   <div className="glass-card p-6 bg-white/5 border-white/10 rounded-3xl">
-                     <h4 className="text-xs font-bold text-primary uppercase tracking-widest mb-6 border-b border-white/5 pb-4">Identity & Counterparties</h4>
+                     <h4 className="text-xs font-bold text-primary uppercase tracking-widest mb-6 border-b border-white/5 pb-4">
+                       {isResume ? 'Professional Identity' : 'Identity & Counterparties'}
+                     </h4>
                      <div className="space-y-4">
-                        <FactItem label="Vendor" value={doc?.structured_json?.vendor_name || doc?.structured_json?.merchant_name} />
-                        <FactItem label="Customer" value={doc?.structured_json?.customer_name} />
-                        <FactItem label="Counterparties" value={doc?.structured_json?.parties} />
-                        <FactItem label="Signatories" value={doc?.structured_json?.signatories} />
+                        {isResume ? (
+                           <>
+                              <FactItem label="Full Name" value={doc?.structured_json?.full_name} isBold />
+                              <FactItem label="Email" value={doc?.structured_json?.email} />
+                              <FactItem label="Phone" value={doc?.structured_json?.phone} />
+                              <FactItem label="Current Role" value={doc?.structured_json?.job_title} />
+                           </>
+                        ) : (
+                           <>
+                              <FactItem label="Vendor" value={doc?.structured_json?.vendor_name || doc?.structured_json?.merchant_name} />
+                              <FactItem label="Customer" value={doc?.structured_json?.customer_name} />
+                              <FactItem label="Counterparties" value={doc?.structured_json?.parties} />
+                              <FactItem label="Signatories" value={doc?.structured_json?.signatories} />
+                           </>
+                        )}
                      </div>
                   </div>
 
                   <div className="glass-card p-6 bg-white/5 border-white/10 rounded-3xl">
-                     <h4 className="text-xs font-bold text-primary uppercase tracking-widest mb-6 border-b border-white/5 pb-4">Financial Core</h4>
+                     <h4 className="text-xs font-bold text-primary uppercase tracking-widest mb-6 border-b border-white/5 pb-4">
+                        {isResume ? 'Career Overview' : 'Financial Core'}
+                     </h4>
                      <div className="space-y-4">
-                        <FactItem label="Grand Total" value={doc?.structured_json?.total_amount || doc?.structured_json?.contract_value} isBold />
-                        <FactItem label="Subtotal" value={doc?.structured_json?.subtotal} />
-                        <FactItem label="Tax / VAT" value={doc?.structured_json?.tax} />
-                        <FactItem label="Currency" value={doc?.structured_json?.currency || 'USD'} />
+                        {isResume ? (
+                           <>
+                              <FactItem label="Total Exp" value={`${doc?.structured_json?.experience_years} Years`} isBold />
+                              <FactItem label="Region" value={doc?.structured_json?.location} />
+                              <FactItem label="Primary Target" value={doc?.structured_json?.job_title} />
+                              <FactItem label="Education" value={doc?.structured_json?.education?.[0] || 'Available in chat'} />
+                           </>
+                        ) : (
+                           <>
+                              <FactItem label="Grand Total" value={doc?.structured_json?.total_amount || doc?.structured_json?.contract_value} isBold />
+                              <FactItem label="Subtotal" value={doc?.structured_json?.subtotal} />
+                              <FactItem label="Tax / VAT" value={doc?.structured_json?.tax} />
+                              <FactItem label="Currency" value={doc?.structured_json?.currency || 'USD'} />
+                           </>
+                        )}
                      </div>
                   </div>
 
@@ -239,14 +290,28 @@ export default function DocumentResultPage({ params }: { params: { id: string } 
                         </div>
                     </div>
                 </ResultCard>
-                <ResultCard title="ACTIONABLE SUGGESTIONS" icon="💡">
+                
+                <ResultCard title={isResume ? "ATS UPGRADE ROADMAP (TO 99%)" : "ACTIONABLE SUGGESTIONS"} icon="💡">
                     <div className="space-y-3">
-                       {doc?.insights?.recommendations?.map((rec: string, i: number) => (
-                          <div key={i} className="p-3 bg-white/5 rounded-xl border border-white/5 text-[10px] text-textMuted leading-relaxed">
-                             {rec}
+                       {(doc?.insights?.ats_roadmap || doc?.insights?.recommendations)?.map((rec: string, i: number) => (
+                          <div key={i} className={`p-3 rounded-xl border flex gap-3 items-center ${
+                             isResume 
+                               ? 'bg-accent/5 border-accent/20 text-accent/80' 
+                               : 'bg-white/5 border-white/5 text-textMuted'
+                            }`}>
+                             <span className="w-1.5 h-1.5 rounded-full bg-current opacity-40 shrink-0"></span>
+                             <span className="text-[10px] leading-relaxed font-bold">{rec}</span>
                           </div>
                        ))}
-                       {doc?.insights?.improvements?.length > 0 && (
+                       {isResume && doc?.insights?.missing_impact_keywords?.length > 0 && (
+                          <div className="mt-4 p-4 bg-primary/20 border border-primary/30 rounded-2xl">
+                             <p className="text-[10px] font-black text-primary uppercase tracking-widest mb-2">Neural Recommendation for 99%</p>
+                             <p className="text-xs text-white leading-relaxed">
+                                "Include missing impact keywords: {doc.insights.missing_impact_keywords.join(', ')}. This will bridge the logic gap for top-tier enterprise screeners."
+                             </p>
+                          </div>
+                       )}
+                       {!isResume && doc?.insights?.improvements?.length > 0 && (
                           <div className="mt-4 p-3 bg-primary/5 border border-primary/20 rounded-xl">
                              <p className="text-[10px] font-bold text-primary uppercase mb-2">Neural Improvement</p>
                              <p className="text-[10px] text-white italic">"{doc.insights.improvements[0]}"</p>

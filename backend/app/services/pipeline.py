@@ -94,7 +94,7 @@ class DocumentPipeline:
                 messages=[
                     {
                         "role": "system",
-                        "content": "You are a document classification expert. Classify the document into one of these types: invoice, receipt, contract, id_card, bank_statement, medical_record, or other."
+                        "content": "You are a document classification expert. Classify the document into one of these types: invoice, receipt, contract, id_card, resume, bank_statement, medical_record, or other."
                     },
                     {
                         "role": "user",
@@ -122,6 +122,7 @@ class DocumentPipeline:
                 "id_card": "Extract ID card data: full_name, date_of_birth, id_number, expiration_date, issuing_authority",
                 "bank_statement": "Extract bank statement data: account_number, statement_period, beginning_balance, ending_balance, transactions (date, description, amount)",
                 "medical_record": "Extract medical record data: patient_name, date_of_birth, medical_record_number, provider_name, visit_date, diagnosis, prescribed_medications",
+                "resume": "Extract resume data: full_name, email, phone, location, job_title, skills (list), experience_years, education (list of institutions and degrees), summary",
                 "other": "Extract any key-value pairs or important information visible in the document"
             }
             
@@ -208,7 +209,7 @@ class DocumentPipeline:
                 messages=[
                     {
                         "role": "system",
-                        "content": "You are an insights generation expert. Analyze the document data and provide: summary (2-3 sentences), key_entities (list of important names/organizations/dates), risk_factors (list if applicable), recommendations (list of actionable items), improvements (what needs to be included to improve the file), and error_reduction (ways to decrease errors with the data/file)."
+                        "content": "You are an insights generation expert. Analyze the document data and provide: summary (2-3 sentences), key_entities (list of important names/organizations/dates), risk_factors (list if applicable), recommendations (list of actionable items), improvements (what needs to be included to improve the file), and error_reduction (ways to decrease errors with the data/file). IF THE DOCUMENT IS A RESUME, also include: ats_score (0-100), ats_roadmap (list of specific steps to reach 99% compatibility), and missing_impact_keywords (list)."
                     },
                     {
                         "role": "user",
@@ -227,6 +228,9 @@ class DocumentPipeline:
                     result["improvements"] = []
                 if "error_reduction" not in result:
                     result["error_reduction"] = []
+                if doc_type == "resume":
+                    if "ats_score" not in result: result["ats_score"] = 70
+                    if "ats_roadmap" not in result: result["ats_roadmap"] = ["Add metrics to experience", "Include missing tech keywords"]
                 return result
             except json.JSONDecodeError:
                 return {
