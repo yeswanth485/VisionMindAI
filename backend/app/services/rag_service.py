@@ -1,5 +1,5 @@
 import uuid
-import openai
+from openai import AsyncOpenAI
 import chromadb
 from typing import List, Dict, Any
 import os
@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Initialize OpenAI client
-openai.api_key = os.getenv("OPENAI_API_KEY")
+client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # Initialize ChromaDB client
 chroma_client = chromadb.PersistentClient(path="./chroma_data")
@@ -17,11 +17,11 @@ collection = chroma_client.get_or_create_collection("documents")
 
 async def create_embedding(text: str) -> List[float]:
     """Create embedding using OpenAI text-embedding-3-small"""
-    response = await openai.Embedding.acreate(
+    response = await client.embeddings.create(
         model="text-embedding-3-small",
         input=text
     )
-    return response['data'][0]['embedding']
+    return response.data[0].embedding
 
 
 async def store_embedding(document_id: uuid.UUID, text: str) -> str:
@@ -77,7 +77,7 @@ async def generate_rag_answer(query: str, context_docs: List[Dict[str, Any]]) ->
         })
     
     # Generate response using GPT
-    response = await openai.ChatCompletion.acreate(
+    response = await client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[
             {

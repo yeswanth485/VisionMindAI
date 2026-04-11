@@ -3,8 +3,30 @@ from typing import Dict, Any, List
 from app.core.database import get_engine
 from app.models.document import Document
 from datetime import datetime, timedelta
+import time
+from functools import wraps
 
+_CACHE = {}
+_CACHE_TTL = 300  # 5 minutes in seconds
 
+def simple_cache(func):
+    """A lightweight TTL cache to speed up analytics endpoints"""
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        cache_key = f"{func.__name__}_{args}_{kwargs}"
+        now = time.time()
+        
+        if cache_key in _CACHE:
+            cached_result, timestamp = _CACHE[cache_key]
+            if now - timestamp < _CACHE_TTL:
+                return cached_result
+                
+        result = func(*args, **kwargs)
+        _CACHE[cache_key] = (result, now)
+        return result
+    return wrapper
+
+@simple_cache
 def get_document_stats() -> Dict[str, Any]:
     """Get overall document statistics"""
     with Session(get_engine()) as session:
@@ -21,13 +43,16 @@ def get_document_stats() -> Dict[str, Any]:
         status_results = session.exec(status_query).all()
         by_status = {status: count for status, count in status_results}
         
-        return {
+        result = {
             "total_documents": total_docs,
             "by_type": by_type,
             "by_status": by_status
         }
+        
+        return result
 
 
+@simple_cache
 def get_risk_distribution() -> Dict[str, int]:
     """Get distribution of risk levels"""
     with Session(get_engine()) as session:
@@ -47,9 +72,11 @@ def get_risk_distribution() -> Dict[str, int]:
             else:
                 risk_counts["low"] += 1  # Default for missing/invalid data
         
-        return risk_counts
+        result = risk_counts
+        return result
 
 
+@simple_cache
 def get_processing_timeline(days: int = 14) -> List[Dict[str, Any]]:
     """Get documents processed per day for the last N days"""
     with Session(get_engine()) as session:
@@ -80,6 +107,7 @@ def get_processing_timeline(days: int = 14) -> List[Dict[str, Any]]:
         return timeline
 
 
+@simple_cache
 def get_top_vendors(limit: int = 10) -> List[Dict[str, Any]]:
     """Get most frequent vendors from structured_json"""
     with Session(get_engine()) as session:
@@ -118,16 +146,23 @@ def get_top_vendors(limit: int = 10) -> List[Dict[str, Any]]:
         return top_vendors
 
 
+@simple_cache
 def get_analytics_summary() -> Dict[str, Any]:
     """Get complete analytics summary"""
-    return {
-        "total_documents": get_document_stats()["total_documents"],
-        "total_invoices": get_document_stats()["by_type"].get("invoice", 0),
+    # Get document stats once to avoid multiple calls
+    doc_stats = get_document_stats()
+    
+    result = {
+        "total_documents": doc_stats["total_documents"],
+        "total_invoices": doc_stats["by_type"].get("invoice", 0),
         "total_amount_processed": _get_total_amount(),
         "risk_distribution": get_risk_distribution()
     }
+    
+    return result
 
 
+@simple_cache
 def _get_total_amount() -> float:
     """Helper to calculate total amount processed"""
     with Session(get_engine()) as session:
