@@ -182,7 +182,7 @@ class DocumentPipeline:
                 messages=[
                     {
                         "role": "system",
-                        "content": "You are an insights generation expert. Analyze the document data and provide: summary (2-3 sentences), key_entities (list of important names/organizations/dates), risk_factors (list if applicable), and recommendations (list of actionable items)."
+                        "content": "You are an insights generation expert. Analyze the document data and provide: summary (2-3 sentences), key_entities (list of important names/organizations/dates), risk_factors (list if applicable), recommendations (list of actionable items), improvements (what needs to be included to improve the file), and error_reduction (ways to decrease errors with the data/file)."
                     },
                     {
                         "role": "user",
@@ -196,13 +196,20 @@ class DocumentPipeline:
             import json
             try:
                 result = json.loads(response.choices[0].message.content)
+                # Ensure the new fields exist
+                if "improvements" not in result:
+                    result["improvements"] = []
+                if "error_reduction" not in result:
+                    result["error_reduction"] = []
                 return result
             except json.JSONDecodeError:
                 return {
                     "summary": response.choices[0].message.content[:200] + "...",
                     "key_entities": [],
                     "risk_factors": [],
-                    "recommendations": ["Review the document manually for insights"]
+                    "recommendations": ["Review the document manually for insights"],
+                    "improvements": [],
+                    "error_reduction": []
                 }
                 
         except Exception as e:
@@ -211,7 +218,9 @@ class DocumentPipeline:
                 "summary": "Unable to generate insights due to processing error",
                 "key_entities": [],
                 "risk_factors": [],
-                "recommendations": ["Please review the document manually"]
+                "recommendations": ["Please review the document manually"],
+                "improvements": [],
+                "error_reduction": []
             }
     
     async def make_decision(self, structured_data: Dict[str, Any], validation: Dict[str, Any], insights: Dict[str, Any], doc_type: str) -> Dict[str, Any]:
@@ -261,7 +270,69 @@ class DocumentPipeline:
         Main pipeline orchestrator
         """
         try:
-            # Step 1: Preprocess
+            # Check if it's a JSON file - handle separately to avoid OCR
+            if filename.lower().endswith('.json'):
+                # Parse JSON directly
+                import json
+                try:
+                    # Decode JSON content
+                    json_data = json.loads(file_content.decode('utf-8'))
+                    raw_text = json.dumps(json_data, indent=2)  # Pretty print for consistency
+                    structured_data = json_data  # Use the parsed JSON directly
+                    doc_type = "json_document"  # Special type for JSON files
+                    
+                    # Skip OCR and classification for JSON files
+                    # Step 5: Validation
+                    validation_result = await self.validate_data(structured_data, doc_type)
+                    
+                    # Step 6: Insights
+                    insights_result = await self.generate_insights(structured_data, doc_type)
+                    
+                    # Step 7: Decision
+                    decision_result = await self.make_decision(
+                        structured_data, validation_result, insights_result, doc_type
+                    )
+                    
+                    # Store embedding for RAG (background task - don't await to avoid blocking)
+                    # Store the embedding with the actual document_id
+                    try:
+                        await store_embedding(document_id, raw_text)
+                    except Exception as e:
+                        print(f"Embedding storage error: {e}")
+                    
+                    # Generate action suggestions
+                    try:
+                        suggested_actions = await suggest_actions(
+                            structured_data, 
+                            doc_type, 
+                            decision_result.get("risk_level", "medium")
+                        )
+                        # Add suggested actions to decision result
+                        if "suggested_actions" not in decision_result:
+                            decision_result["suggested_actions"] = suggested_actions
+                    except Exception as e:
+                        print(f"Action engine error: {e}")
+                    
+                    return {
+                        "file_url": f"/uploads/{filename}",  # Placeholder - actual file storage would be implemented
+                        "raw_text": raw_text,
+                        "doc_type": doc_type,
+                        "structured_json": structured_data,
+                        "validation": validation_result,
+                        "insights": insights_result,
+                        "decision": decision_result,
+                        "status": "completed"
+                    }
+                except json.JSONDecodeError as e:
+                    # If JSON parsing fails, fall back to regular processing
+                    print(f"JSON parsing failed, falling back to regular processing: {e}")
+                    # Continue with regular processing below
+                except Exception as e:
+                    # If any other error occurs with JSON processing, fall back
+                    print(f"JSON processing error, falling back to regular processing: {e}")
+                    # Continue with regular processing below
+            
+            # Step 1: Preprocess (for non-JSON files)
             images = await self.preprocess(file_content, filename)
             
             # Step 2: OCR
@@ -313,19 +384,6 @@ class DocumentPipeline:
                 "insights": insights_result,
                 "decision": decision_result,
                 "status": "completed"
-            }
-            
-        except Exception as e:
-            print(f"Pipeline error: {e}")
-            return {
-                "file_url": None,
-                "raw_text": "",
-                "doc_type": "error",
-                "structured_json": {"error": str(e)},
-                "validation": {"is_valid": False, "validation_score": 0},
-                "insights": {"summary": "Processing failed"},
-                "decision": {"risk_level": "high", "decision_status": "failed"},
-                "status": "failed"
             }
             
         except Exception as e:

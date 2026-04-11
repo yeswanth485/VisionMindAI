@@ -26,7 +26,7 @@ async def upload_document(
     Handle document upload and trigger processing pipeline
     """
     # Validate file type
-    allowed_extensions = {".pdf", ".png", ".jpg", ".jpeg", ".tiff", ".bmp"}
+    allowed_extensions = {".pdf", ".png", ".jpg", ".jpeg", ".tiff", ".bmp", ".json"}
     file_extension = os.path.splitext(file.filename)[1].lower()
     
     if file_extension not in allowed_extensions:

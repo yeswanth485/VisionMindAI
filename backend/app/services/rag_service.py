@@ -82,11 +82,11 @@ async def generate_rag_answer(query: str, context_docs: List[Dict[str, Any]]) ->
         messages=[
             {
                 "role": "system",
-                "content": "You are a helpful assistant that answers questions based on provided document context. Always cite your sources."
+                "content": "You are a helpful assistant that can answer general questions and also questions based on provided document context. If context documents are provided and relevant to the question, answer based on the context. For general conversational questions or when context is not relevant, provide a helpful response using your general knowledge."
             },
             {
                 "role": "user",
-                "content": f"Context documents:\n{context_text}\n\nQuestion: {query}\n\nAnswer based only on the provided context:"
+                "content": f"Context documents:\n{context_text}\n\nQuestion: {query}\n\nAnswer helpfully:"
             }
         ],
         temperature=0.1,

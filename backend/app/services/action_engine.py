@@ -1,14 +1,13 @@
 import json
-import openai
-from typing import List, Dict, Any
 import os
+from typing import List, Dict, Any
+from openai import AsyncOpenAI
 from dotenv import load_dotenv
 
 load_dotenv()
 
 # Initialize OpenAI client
-openai.api_key = os.getenv("OPENAI_API_KEY")
-
+client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 async def suggest_actions(structured_json: Dict[str, Any], doc_type: str, risk_level: str) -> List[Dict[str, Any]]:
     """Suggest actions based on document data using GPT"""
@@ -46,8 +45,8 @@ Only return the JSON object, no additional text.
 """
 
     try:
-        # Generate response using GPT
-        response = await openai.ChatCompletion.acreate(
+        # Generate response using new AsyncOpenAI client
+        response = await client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
                 {
@@ -96,6 +95,7 @@ Only return the JSON object, no additional text.
         return validated_actions
         
     except Exception as e:
+        print(f"Action engine error: {e}")
         # Fallback actions if GPT fails
         return [
             {

@@ -21,13 +21,7 @@ async def chat_with_documents(request: ChatRequest):
         # Search for similar documents
         similar_docs = await search_similar(request.query, top_k=5)
         
-        if not similar_docs:
-            return ChatResponse(
-                answer="I couldn't find any relevant documents to answer your question. Please upload some documents first.",
-                sources=[]
-            )
-        
-        # Generate answer using retrieved context
+        # Generate answer using retrieved context (will work even with empty docs)
         result = await generate_rag_answer(request.query, similar_docs)
         
         return ChatResponse(**result)
