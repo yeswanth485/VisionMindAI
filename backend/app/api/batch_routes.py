@@ -25,8 +25,8 @@ async def batch_upload_documents(
     """
     Handle batch document upload and trigger processing pipeline for each file
     """
-     # Validate file type
-     allowed_extensions = {".pdf", ".png", ".jpg", ".jpeg", ".tiff", ".bmp", ".json"}
+    # Validate file type
+    allowed_extensions = {".pdf", ".png", ".jpg", ".jpeg", ".tiff", ".bmp", ".json"}
     uploaded_docs = []
     
     try:
