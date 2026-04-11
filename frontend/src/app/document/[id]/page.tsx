@@ -52,9 +52,9 @@ export default function DocumentResultPage({ params }: { params: { id: string } 
   const isProcessing = !doc || doc.status === 'processing' || doc.status === 'pending';
   const isFailed = doc?.status === 'failed';
   
-  // Robust Resume Detection (handles variations from AI output)
+  // Robust Resume Detection (handles sentences or keywords from AI)
   const docTypeLower = doc?.doc_type?.toLowerCase() || '';
-  const isResume = docTypeLower === 'resume' || 
+  const isResume = docTypeLower.includes('resume') || 
                    docTypeLower.includes('curriculum') || 
                    docTypeLower.includes('cv') ||
                    docTypeLower.includes('bio-data');

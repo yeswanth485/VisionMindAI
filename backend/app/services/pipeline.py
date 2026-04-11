@@ -94,17 +94,22 @@ class DocumentPipeline:
                 messages=[
                     {
                         "role": "system",
-                        "content": "You are a document classification expert. Classify the document into EXACTLY ONE of these lowercase categories: invoice, receipt, contract, id_card, resume, bank_statement, medical_record, or other. If the document is a CV, Curriculum Vitae, or Professional Profile, you MUST classify it as 'resume'."
+                        "content": "You are a document classification expert. Classify the document text into EXACTLY ONE word from this list: invoice, receipt, contract, id_card, resume, bank_statement, medical_record, other. Return ONLY the single word. No punctuation, no explanation, no 'this document is'. If it looks like a CV or professional profile, return 'resume'."
                     },
                     {
                         "role": "user",
-                        "content": f"Classify this document text. If it contains work experience or education, it is likely a 'resume': {text[:3000]}"
+                        "content": f"Classify this text. Output only the category: {text[:2000]}"
                     }
                 ],
-                max_tokens=50,
-                temperature=0.1
+                max_tokens=10,
+                temperature=0.0
             )
-            return response.choices[0].message.content.strip().lower()
+            cat = response.choices[0].message.content.strip().lower()
+            # Safety check to strip any residual punctuation or verbosity
+            for keyword in ['invoice', 'receipt', 'contract', 'id_card', 'resume', 'bank_statement', 'medical_record']:
+                if keyword in cat:
+                    return keyword
+            return "other"
         except Exception as e:
             print(f"Classification error: {e}")
             return "other"
@@ -419,7 +424,7 @@ class DocumentPipeline:
         except Exception as e:
             print(f"Pipeline error: {e}")
             return {
-                "file_url": None,
+                "file_url": f"/uploads/{filename}",
                 "raw_text": "",
                 "doc_type": "error",
                 "structured_json": {"error": str(e)},
