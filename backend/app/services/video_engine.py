@@ -4,7 +4,7 @@ import json
 from typing import List, Tuple
 from PIL import Image
 import io
-import moviepy.editor as mp
+import moviepy as mp
 import httpx
 from app.core.config import settings
 
