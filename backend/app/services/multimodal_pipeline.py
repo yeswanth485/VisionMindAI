@@ -87,6 +87,14 @@ class MultimodalPipeline:
                 "confidence_score": 0.0
             }
             
+            # Initialize variables to prevent UnboundLocalError
+            unified_reasoning = result["unified_reasoning"]
+            action_analysis = {}
+            input_classification = ""
+            agent_context = {}
+            plan = []
+            agent_result = result["agent_result"]
+            
             # Process based on input type
             transcript = ""
             frame_descriptions = []

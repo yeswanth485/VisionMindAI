@@ -306,6 +306,14 @@ class DocumentPipeline:
         Main pipeline orchestrator
         """
         try:
+            # Initialize variables to prevent UnboundLocalError
+            raw_text = ""
+            doc_type = "unknown"
+            structured_data = {}
+            validation_result = {"is_valid": False, "validation_score": 0}
+            insights_result = {"summary": "No insights generated"}
+            decision_result = {"risk_level": "medium", "decision_status": "pending"}
+            
             # Check if it's a JSON file - handle separately to avoid OCR
             if filename.lower().endswith('.json'):
                 # Parse JSON directly

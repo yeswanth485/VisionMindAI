@@ -19,6 +19,8 @@ async def execute_agent_goal(
     Execute an AI agent goal on a specific document context or general context
     """
     try:
+        # Initialize doc_uuid to None to prevent UnboundLocalError
+        doc_uuid = None
         context = {}
         
         # If document_id provided, fetch it for context
