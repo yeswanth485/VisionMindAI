@@ -14,7 +14,7 @@ export default function StudioReport() {
   const [documentId, setDocumentId] = useState<string | null>(null);
 
   useEffect(() => {
-    const id = params.id;
+    const id = Array.isArray(params.id) ? params.id[0] : params.id;
     if (id) {
       setDocumentId(id);
       // In a real implementation, fetch the document by ID from backend
