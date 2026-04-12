@@ -141,27 +141,31 @@ async def list_documents() -> List[Dict[str, Any]]:
     """
     try:
         with Session(get_engine()) as session:
-            statement = select(Document).order_by(Document.created_at.desc())
+            # Lean query: only select columns used in the list view
+            statement = (
+                select(Document.id, Document.doc_type, Document.status, Document.created_at)
+                .order_by(Document.created_at.desc())
+            )
             documents = session.exec(statement).all()
             
             result = []
-            for doc in documents:
+            for doc_id, doc_type, status, created_at in documents:
                 try:
                     created_at_str = None
-                    if doc.created_at:
-                        if hasattr(doc.created_at, 'isoformat'):
-                            created_at_str = doc.created_at.isoformat()
+                    if created_at:
+                        if hasattr(created_at, 'isoformat'):
+                            created_at_str = created_at.isoformat()
                         else:
-                            created_at_str = str(doc.created_at)
+                            created_at_str = str(created_at)
                     
                     result.append({
-                        "id": str(doc.id),
-                        "doc_type": doc.doc_type,
-                        "status": doc.status,
+                        "id": str(doc_id),
+                        "doc_type": doc_type,
+                        "status": status,
                         "created_at": created_at_str
                     })
                 except Exception as e:
-                    print(f"Error serializing document {doc.id}: {e}")
+                    print(f"Error serializing document {doc_id}: {e}")
                     continue
             
             return result
