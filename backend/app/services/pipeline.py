@@ -12,6 +12,7 @@ from dotenv import load_dotenv
 # Import new services for Phase 2
 from .rag_service import store_embedding
 from .action_engine import suggest_actions
+from .ats_service import ats_service
 from app.core.ai_client import ai_client
 
 load_dotenv()
@@ -390,6 +391,15 @@ class DocumentPipeline:
                 structured_data, validation_result, insights_result, doc_type
             )
             
+            # Step 8: Specialized Neural ATS Analysis (if resume)
+            if doc_type == "resume":
+                try:
+                    ats_intelligence = await ats_service.analyze_resume(raw_text, structured_data)
+                    # Merge or add to insights
+                    insights_result["ats_intelligence"] = ats_intelligence
+                except Exception as e:
+                    print(f"ATS Intelligence injection error: {e}")
+
             # Store embedding for RAG (background task - don't await to avoid blocking)
             # Store the embedding with the actual document_id
             try:

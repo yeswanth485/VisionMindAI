@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { documentAPI } from '@/services/api';
 import { DocumentResponse } from '@/types';
 import ResultCard from '@/components/ResultCard';
@@ -9,6 +10,7 @@ import ResultCard from '@/components/ResultCard';
 export default function DocumentResultPage({ params }: { params: { id: string } }) {
   const [doc, setDoc] = useState<DocumentResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout;
@@ -104,6 +106,21 @@ export default function DocumentResultPage({ params }: { params: { id: string } 
         </div>
         
          <div className="flex items-center gap-3">
+            {isResume && doc?.insights?.ats_intelligence && (
+              <button 
+                onClick={() => {
+                  const data = encodeURIComponent(JSON.stringify({
+                    insights: { ats_intelligence: doc.insights.ats_intelligence }
+                  }));
+                  router.push(`/ats-scanner?data=${data}&filename=${doc.id.substring(0,8)}`);
+                }}
+                className="px-8 py-3 bg-white text-black rounded-2xl font-bold shadow-lg hover:bg-primary transition-all uppercase tracking-widest text-xs flex items-center gap-2 group"
+              >
+                <span className="animate-pulse">✨</span>
+                SWITCH TO PREMIUM ATS
+                <span className="group-hover:translate-x-1 transition-transform">→</span>
+              </button>
+            )}
             <button 
                 onClick={() => {
                   window.location.href = `/chat?docId=${params.id}`;

@@ -23,4 +23,42 @@
   .gradient-text {
     @apply text-transparent bg-clip-text bg-gradient-to-r from-primary via-blue-400 to-secondary;
   }
+
+  /* Neural Scan Animations */
+  @keyframes scanline {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100%); }
+  }
+
+  .neural-scan-line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(to right, transparent, rgba(var(--primary-rgb), 1), transparent);
+    box-shadow: 0 0 15px rgba(var(--primary-rgb), 0.8);
+    animation: scanline 3s linear infinite;
+    z-index: 20;
+  }
+
+  @keyframes pulse-glow {
+    0% { box-shadow: 0 0 0 0 rgba(var(--primary-rgb), 0.4); }
+    70% { box-shadow: 0 0 0 20px rgba(var(--primary-rgb), 0); }
+    100% { box-shadow: 0 0 0 0 rgba(var(--primary-rgb), 0); }
+  }
+
+  .pulse-primary {
+    animation: pulse-glow 2s infinite;
+  }
+
+  @keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+  }
+
+  .float-animation {
+    animation: float 4s ease-in-out infinite;
+  }
 }

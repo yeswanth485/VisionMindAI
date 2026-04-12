@@ -12,5 +12,4 @@ aiofiles
 chromadb>=0.5.3
 numpy<2.0
 moviepy
-openai-whisper
 httpx

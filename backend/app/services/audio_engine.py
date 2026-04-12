@@ -1,35 +1,64 @@
 import os
-import tempfile
-import whisper
+import base64
+import json
 from typing import Optional
-import torch
+import httpx
+from app.core.config import settings
+
+# OpenRouter API configuration
+OPENROUTER_API_KEY = settings.OPENROUTER_API_KEY
+OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
+MODEL_NAME = "google/gemini-flash-1.5"  # Using Gemini Flash 1.5 as it supports audio input
 
 class AudioEngine:
     def __init__(self):
-        # Load Whisper model (using base model for balance of speed and accuracy)
-        self.model = whisper.load_model("base")
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
-        self.model.to(self.device)
-    
+        # No model loading needed - using OpenRouter API
+        pass
+     
     def transcribe_audio(self, audio_bytes: bytes) -> str:
-        """Transcribe audio bytes to text using Whisper"""
+        """Transcribe audio bytes to text using OpenRouter API"""
         try:
-            # Save audio bytes to temporary file
-            with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp_file:
-                tmp_file.write(audio_bytes)
-                tmp_file_path = tmp_file.name
+            # Encode audio to base64
+            base64_audio = base64.b64encode(audio_bytes).decode('utf-8')
             
-            # Transcribe with Whisper
-            result = self.model.transcribe(tmp_file_path)
+            headers = {
+                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+                "Content-Type": "application/json"
+            }
             
-            # Clean up temp file
-            os.unlink(tmp_file_path)
+            payload = {
+                "model": MODEL_NAME,
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": "Transcribe this audio file. Return only the transcribed text without any additional commentary."
+                            },
+                            {
+                                "type": "input_audio",
+                                "input_audio": {
+                                    "data": base64_audio,
+                                    "format": "wav"  # Assuming WAV format, adjust if needed
+                                }
+                            }
+                        ]
+                    }
+                ],
+                "max_tokens": 1000
+            }
             
-            return result["text"].strip()
+            response = httpx.post(OPENROUTER_API_URL, headers=headers, json=payload, timeout=30.0)
+            response.raise_for_status()
+            
+            result = response.json()
+            transcript = result["choices"][0]["message"]["content"]
+            return transcript.strip()
         except Exception as e:
             print(f"Error transcribing audio: {e}")
             return ""
-    
+     
     def transcribe_video_audio(self, video_bytes: bytes) -> str:
         """Extract audio from video and transcribe it"""
         try:
