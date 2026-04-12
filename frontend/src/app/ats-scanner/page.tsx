@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import NeuralATSDashboard from '@/components/NeuralATSDashboard';
 import Sidebar from '@/components/Sidebar';
 import { motion } from 'framer-motion';
 
-export default function ATSScannerPage() {
+function ATSScannerContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [data, setData] = useState<any>(null);
@@ -120,5 +120,17 @@ export default function ATSScannerPage() {
         }
       `}</style>
     </div>
+  );
+}
+
+export default function ATSScannerPage() {
+  return (
+    <Suspense fallback={
+       <div className="min-h-screen bg-black flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>
+       </div>
+    }>
+       <ATSScannerContent />
+    </Suspense>
   );
 }

@@ -1,12 +1,12 @@
 'use client';
 
 import { useParams, useSearchParams } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import UploadForm from '@/components/UploadForm';
 import FileUpload from '@/components/FileUpload';
 import ResultCard from '@/components/ResultCard';
 
-export default function StudioReport() {
+function StudioReportContent() {
   const params = useParams();
   const searchParams = useSearchParams();
   const [results, setResults] = useState<any[]>([]);
@@ -68,7 +68,7 @@ export default function StudioReport() {
     } catch (error) {
       console.error('Error loading document:', error);
       setResults([{
-        error: 'Failed to load document',
+        error: error instanceof Error ? error.message : 'An unknown error occurred',
         input_type: 'error',
         summary: 'Loading failed'
       }]);
@@ -163,5 +163,17 @@ export default function StudioReport() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function StudioReport() {
+  return (
+    <Suspense fallback={
+       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>
+       </div>
+    }>
+       <StudioReportContent />
+    </Suspense>
   );
 }
