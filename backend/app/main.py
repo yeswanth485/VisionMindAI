@@ -42,8 +42,11 @@ app.include_router(api_router, prefix="/api")
 app.include_router(rag_router, prefix="/api")
 app.include_router(analytics_router, prefix="/api")
 app.include_router(batch_router, prefix="/api")
+
 from app.api.multimodal_routes import router as multimodal_router
+from app.api.agent_routes import router as agent_router
 app.include_router(multimodal_router, prefix="/api")
+app.include_router(agent_router, prefix="/api")
 
 @app.on_event("startup")
 async def startup_event():

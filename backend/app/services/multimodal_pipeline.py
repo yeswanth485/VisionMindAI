@@ -130,24 +130,44 @@ class MultimodalPipeline:
                 frame_descriptions = []  # No video frames
                 
             else:  # DOCUMENT or MULTIMODAL
-                # For documents, we'd use existing pipeline - simplified here
-                # In reality, this would call the existing document processing pipeline
-                transcript = ""  # No audio
-                frame_descriptions = []  # No video
-                
-                # Extract text from document (simplified)
+                # Process as document using the AI reasoning engine
                 try:
-                    # Try to decode as text
                     text_content = file_content.decode('utf-8', errors='ignore')
                 except:
                     text_content = f"Binary document: {filename}"
                 
-                result["summary"] = f"Document processed: {filename}"
+                # Use multimodal fusion to reason about the document content
+                fused_context = self.multimodal_fusion.fuse_contexts(
+                    ocr_text=text_content,
+                    frame_descriptions=[],
+                    transcript=""
+                )
+                
+                # Perform AI reasoning
+                reasoning = self.multimodal_fusion.run_multimodal_reasoning(fused_context)
+                
+                result["summary"] = reasoning.get("unified_summary", f"Document processed: {filename}")
+                result["unified_reasoning"] = reasoning
+                
+                # Reliable data extraction
+                word_count = len(text_content.split())
                 result["structured_data"] = {
-                    "document_text": text_content[:1000],  # First 1000 chars
-                    "document_length": len(text_content)
+                    "document_text": text_content[:2000],  # More context
+                    "document_length": len(text_content),
+                    "word_count": word_count,
+                    "filename": filename,
+                    "key_entities": reasoning.get("key_entities", []),
+                    "sentiment": "neutral", # Default
                 }
-                result["insights"] = []  # Would extract insights from document
+                
+                result["insights"] = [
+                    f"Word density: {(word_count / max(1, len(text_content))) * 100:.2f}%",
+                    f"Entity count: {len(reasoning.get('key_entities', []))}"
+                ]
+                
+                # Update high-level summary
+                if reasoning.get("unified_summary"):
+                    result["summary"] = reasoning["unified_summary"]
             
             # Run multimodal reasoning (Engine 2)
             fused_context = self.multimodal_fusion.fuse_contexts(
