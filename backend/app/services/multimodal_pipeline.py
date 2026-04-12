@@ -88,6 +88,9 @@ class MultimodalPipeline:
             }
             
             # Process based on input type
+            transcript = ""
+            frame_descriptions = []
+            
             if input_type == InputType.VIDEO:
                 # Process video
                 frames, timestamps = self.video_engine.extract_keyframes(file_content)
@@ -169,15 +172,18 @@ class MultimodalPipeline:
                 if reasoning.get("unified_summary"):
                     result["summary"] = reasoning["unified_summary"]
             
-            # Run multimodal reasoning (Engine 2)
-            fused_context = self.multimodal_fusion.fuse_contexts(
-                ocr_text=result["structured_data"].get("document_text", ""),
-                frame_descriptions=frame_descriptions,
-                transcript=result["structured_data"].get("transcript", "")
-            )
-            
-            unified_reasoning = self.multimodal_fusion.run_multimodal_reasoning(fused_context)
-            result["unified_reasoning"] = unified_reasoning
+            # Run unified multimodal reasoning (Engine 2) for all types if not already run
+            if not result["unified_reasoning"].get("unified_summary"):
+                fused_context = self.multimodal_fusion.fuse_contexts(
+                    ocr_text=result["structured_data"].get("document_text", "") or result["structured_data"].get("transcript", ""),
+                    frame_descriptions=frame_descriptions,
+                    transcript=transcript
+                )
+                
+                unified_reasoning = self.multimodal_fusion.run_multimodal_reasoning(fused_context)
+                result["unified_reasoning"] = unified_reasoning
+            else:
+                unified_reasoning = result["unified_reasoning"]
             
             # Classify input type for reasoning
             input_classification = self.multimodal_fusion.classify_input(unified_reasoning["unified_summary"])
