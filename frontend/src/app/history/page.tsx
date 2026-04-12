@@ -21,7 +21,7 @@ export default function HistoryPage() {
       try {
         const data = await documentAPI.getHistory();
         setDocuments(data);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error(err);
         setError('Could not load history. Please ensure the backend is online.');
       } finally {

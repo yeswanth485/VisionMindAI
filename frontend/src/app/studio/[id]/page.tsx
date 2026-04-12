@@ -100,7 +100,7 @@ export default function StudioReport() {
       console.error('Upload error:', error);
       setResults(prev => [
         {
-          error: error.message,
+          error: error instanceof Error ? error.message : 'An unknown error occurred',
           input_type: 'error',
           summary: 'Processing failed'
         },

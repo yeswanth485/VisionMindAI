@@ -30,9 +30,10 @@ export default function FileUpload() {
         // Redirect to processing page
         router.push(`/document/${response.document_id}`);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setError(err.response?.data?.detail || 'Failed to upload document. Please try again.');
+      const errorMsg = err instanceof Error ? (err as any).response?.data?.detail || err.message : 'Failed to upload document. Please try again.';
+      setError(errorMsg);
       setIsUploading(false);
     }
   };

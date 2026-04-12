@@ -102,9 +102,10 @@ export default function BatchUploadPage() {
         window.location.href = '/history';
       }, 2000);
       
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Batch upload error:', err);
-      setError(err.response?.data?.detail || 'Failed to upload batch. Please try again.');
+      const errorMsg = err instanceof Error ? (err as any).response?.data?.detail || err.message : 'Failed to upload batch. Please try again.';
+      setError(errorMsg);
       setUploadProgress(prev => prev.map(p => ({...p, status: 'error', progress: 0})));
     } finally {
       setIsUploading(false);

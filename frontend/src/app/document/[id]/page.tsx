@@ -23,9 +23,12 @@ export default function DocumentResultPage({ params }: { params: { id: string } 
         if (data.status === 'completed' || data.status === 'failed') {
           clearInterval(intervalId);
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error(err);
-        const errorMsg = err.response?.data?.detail || err.message || "Unknown Connection Error";
+        let errorMsg = "Unknown Connection Error";
+        if (err instanceof Error) {
+          errorMsg = (err as any).response?.data?.detail || err.message;
+        }
         setError(`Failed to fetch document status: ${errorMsg}`);
         clearInterval(intervalId);
       }
