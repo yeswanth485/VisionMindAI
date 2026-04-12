@@ -172,3 +172,7 @@ async def list_documents() -> List[Dict[str, Any]]:
     except Exception as e:
         print(f"Global error in list_documents: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/debug-ping")
+async def debug_ping():
+    return {"status": "ok", "version": "1.0.1_bugfix"}
