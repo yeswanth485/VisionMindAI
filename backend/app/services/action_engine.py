@@ -1,20 +1,18 @@
 import json
 import os
 from typing import List, Dict, Any
-from openai import AsyncOpenAI
-from dotenv import load_dotenv
-
-load_dotenv()
 
 from ..core.ai_client import ai_client as client
 
+
 async def suggest_actions(structured_json: Dict[str, Any], doc_type: str, risk_level: str) -> List[Dict[str, Any]]:
-    """Suggest actions based on document data using GPT"""
-    
-    # Convert structured JSON to string for prompt
-    data_str = json.dumps(structured_json, indent=2)
-    
-    # Prepare prompt for GPT
+    """Suggest actions based on document data using GPT via OpenRouter"""
+
+    try:
+        data_str = json.dumps(structured_json, indent=2)[:3000]
+    except Exception:
+        data_str = str(structured_json)[:3000]
+
     prompt = f"""
 Given this document data:
 {data_str}
@@ -33,78 +31,46 @@ Return STRICT JSON with the following format:
   ]
 }}
 
-Provide 2-4 actionable items based on the document analysis. Consider:
-- Document type specific actions (invoice approval, receipt validation, ID verification)
-- Risk level appropriate actions (high risk needs more scrutiny)
-- Data quality issues that need addressing
-- Compliance or validation requirements
-- Business process next steps
-
+Provide 2-4 actionable items based on the document analysis.
 Only return the JSON object, no additional text.
 """
 
     try:
-        # Generate response using new AsyncOpenAI client
         response = await client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model="openai/gpt-3.5-turbo",  # OpenRouter requires provider prefix
             messages=[
                 {
                     "role": "system",
-                    "content": "You are an AI assistant that suggests business actions based on document analysis. Return only valid JSON."
+                    "content": "You are an AI assistant that suggests business actions. Return only valid JSON."
                 },
                 {
                     "role": "user",
                     "content": prompt
                 }
             ],
+            response_format={"type": "json_object"},
             temperature=0.3,
-            max_tokens=300
+            max_tokens=400
         )
-        
-        # Parse the response
+
         result_text = response.choices[0].message.content.strip()
-        
-        # Extract JSON from response (handle potential extra text)
-        if result_text.startswith("{"):
-            result = json.loads(result_text)
-        else:
-            # Try to find JSON in the response
-            start_idx = result_text.find("{")
-            end_idx = result_text.rfind("}") + 1
-            if start_idx >= 0 and end_idx > start_idx:
-                json_str = result_text[start_idx:end_idx]
-                result = json.loads(json_str)
-            else:
-                raise ValueError("No valid JSON found in response")
-        
-        # Validate and return actions
+        result = json.loads(result_text)
         actions = result.get("actions", [])
-        
-        # Ensure each action has required fields
-        validated_actions = []
+
+        validated = []
         for action in actions:
             if isinstance(action, dict) and "label" in action:
-                validated_action = {
+                validated.append({
                     "label": str(action["label"]),
                     "priority": action.get("priority", "medium"),
                     "icon": action.get("icon", "➡️")
-                }
-                validated_actions.append(validated_action)
-        
-        return validated_actions
-        
+                })
+
+        return validated
+
     except Exception as e:
         print(f"Action engine error: {e}")
-        # Fallback actions if GPT fails
         return [
-            {
-                "label": "Review Document",
-                "priority": "medium",
-                "icon": "👁️"
-            },
-            {
-                "label": "Validate Data",
-                "priority": "high" if risk_level == "high" else "medium",
-                "icon": "🔍"
-            }
+            {"label": "Review Document", "priority": "medium", "icon": "👁️"},
+            {"label": "Validate Data", "priority": "high" if risk_level == "high" else "medium", "icon": "🔍"}
         ]

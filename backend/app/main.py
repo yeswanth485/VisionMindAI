@@ -21,10 +21,18 @@ app = FastAPI(title="VisionMind AI Document Intelligence System", version="1.0.0
 # Mount Static Files to serve uploaded documents
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
-# Configure CORS - Highly Permissive for Debugging
+# Configure CORS - Relaxed for production and preview environments
+# This fixes Bug #6 (CORS blocking preview deployments)
+origins = [
+    "https://vision-mind-ai.vercel.app",
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "https://vision-mind-ai-git-main-yeswanths-projects-1fd9ed30.vercel.app", # Specific preview
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://vision-mind-ai.vercel.app", "http://localhost:3000"],
+    allow_origins=["*"], # For production robustness during bug fixing, allow all origins
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
