@@ -34,8 +34,15 @@ export default function HistoryPage() {
   return (
     <div className="flex flex-col min-h-screen p-8 lg:p-12 animate-fade-in">
       <header className="mb-12">
-        <h1 className="text-3xl md:text-4xl font-bold mb-2">Processing History</h1>
-        <p className="text-textMuted text-lg">View and manage your previously analyzed documents.</p>
+        <h1 className="text-3xl md:text-5xl font-black text-white tracking-tighter mb-2">
+           PROCESSING <span className="text-primary">HISTORY</span>
+        </h1>
+        <div className="glass-card p-6 border-l-4 border-l-primary bg-primary/5 mb-6 max-w-3xl">
+          <h2 className="text-lg font-bold text-white mb-2">Intelligence Archive</h2>
+          <p className="text-textMuted text-sm">
+            View and manage your previously analyzed documents. Access parsed data, revisit chats, or re-process intelligence extractions seamlessly.
+          </p>
+        </div>
       </header>
 
       <section className="flex-1 w-full max-w-6xl mx-auto">

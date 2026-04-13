@@ -3,16 +3,21 @@ import FileUpload from '@/components/FileUpload';
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen p-8 lg:p-12">
-      <header className="mb-12 flex justify-between items-center">
+      <header className="mb-12 flex flex-col md:flex-row md:items-start justify-between gap-6">
         <div>
-          <h1 className="text-3xl md:text-5xl font-black mb-3 text-white tracking-tighter">VisionMind <span className="text-primary italic">AI</span></h1>
-          <p className="text-textMuted text-lg max-w-2xl">
-            Enterprise-Grade Document Intelligence. Upload an invoice, receipt, or resume to unleash instantaneous neural extraction, validation, and real-world ATS scoring.
-          </p>
+          <h1 className="text-3xl md:text-5xl font-black mb-4 text-white tracking-tighter">
+            VisionMind <span className="text-primary italic">AI</span>
+          </h1>
+          <div className="glass-card p-6 border-l-4 border-l-primary bg-primary/5 max-w-3xl">
+             <h2 className="text-lg font-bold text-white mb-2">Enterprise-Grade Document Intelligence</h2>
+             <p className="text-textMuted text-sm">
+               Upload an invoice, receipt, or resume to unleash instantaneous neural extraction, validation, and real-world ATS scoring. VisionMind dynamically adapts to the document type for deep contextual analysis.
+             </p>
+          </div>
         </div>
-        <div className="hidden md:flex gap-4">
-          <div className="glass px-4 py-2 rounded-lg text-sm flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-accent animate-pulse"></div>
+        <div className="hidden md:flex gap-4 self-start">
+          <div className="glass px-4 py-2 rounded-lg text-sm flex items-center gap-2 border border-white/5 shadow-xl">
+            <div className="w-2 h-2 rounded-full bg-accent animate-pulse shadow-[0_0_10px_var(--accent)]"></div>
             API Online
           </div>
         </div>

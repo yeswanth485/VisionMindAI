@@ -92,9 +92,12 @@ export default function AnalyticsPage() {
     <div className="flex flex-col min-h-screen p-6 lg:p-12 animate-fade-in">
       <header className="mb-8">
         <h1 className="text-3xl md:text-4xl font-bold mb-2">📊 Analytics Dashboard</h1>
-        <p className="text-textMuted text-lg">
-          Insights and metrics from your processed documents
-        </p>
+        <div className="glass-card p-6 border-l-4 border-l-primary bg-primary/5 mt-4 max-w-3xl">
+          <h2 className="text-lg font-bold text-white mb-2">Pipeline Insights & Telemetry</h2>
+          <p className="text-textMuted text-sm">
+            Monitor your entire fleet of processed documents. This live telemetry dashboard aggregates entity distribution, monitors system-wide risk vectors, and visualizes document inflow volume over time to ensure deep operational transparency.
+          </p>
+        </div>
       </header>
 
       {!summary ? (

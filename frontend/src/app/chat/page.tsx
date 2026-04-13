@@ -98,10 +98,18 @@ function ChatContent() {
        <header className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
          <div>
            <h1 className="text-3xl md:text-4xl font-bold mb-2">💬 Document Chat</h1>
-           <p className="text-textMuted text-lg">
+           <div className="glass-card p-6 border-l-4 border-l-primary bg-primary/5 mb-6 max-w-3xl">
+             <h2 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
+               Neural Intelligence Chat
+             </h2>
+             <p className="text-textMuted text-sm">
+               Engage in real-time dialectics with your processed documents. The system uses RAG (Retrieval-Augmented Generation) to search through your exact context and generate precise, factual answers. You can chat with the General AI Brain or focus exclusively on a specific document.
+             </p>
+           </div>
+           <p className="text-textMuted text-base mb-4 font-medium max-w-2xl">
              {docId 
-               ? `Deep-dive analysis for Document #${docId.substring(0, 8)}` 
-               : "Ask questions across all your processed documents using AI-powered retrieval"}
+               ? `Active Deep-Dive Mode: Interrogating Document #${docId.substring(0, 8)}` 
+               : "Global Brain Mode: Search across your entire intelligence database."}
            </p>
            <div className="flex items-center space-x-4 mt-4">
              <span className="text-textMuted text-xs font-bold uppercase tracking-widest">AI Context Profile:</span>
