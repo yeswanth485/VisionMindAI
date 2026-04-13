@@ -2,7 +2,7 @@ import logging
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
-from app.services.rag_service import search_similar, generate_rag_answer
+from ..services.rag_service import search_similar, generate_rag_answer
 
 router = APIRouter()
 

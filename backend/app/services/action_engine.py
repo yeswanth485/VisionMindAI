@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from app.core.ai_client import ai_client as client
+from ..core.ai_client import ai_client as client
 
 async def suggest_actions(structured_json: Dict[str, Any], doc_type: str, risk_level: str) -> List[Dict[str, Any]]:
     """Suggest actions based on document data using GPT"""

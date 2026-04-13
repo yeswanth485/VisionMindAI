@@ -1,6 +1,6 @@
 import json
 from typing import Dict, Any, List
-from app.core.ai_client import ai_client
+from ..core.ai_client import ai_client
 
 class NeuralATSService:
     def __init__(self):

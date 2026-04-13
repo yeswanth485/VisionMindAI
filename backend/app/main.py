@@ -3,11 +3,11 @@ import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from app.api.routes import router as api_router
-from app.api.rag_routes import router as rag_router
-from app.api.analytics_routes import router as analytics_router
-from app.api.batch_routes import router as batch_router
-from app.core.database import create_db_and_tables
+from .api.routes import router as api_router
+from .api.rag_routes import router as rag_router
+from .api.analytics_routes import router as analytics_router
+from .api.batch_routes import router as batch_router
+from .core.database import create_db_and_tables
 
 # Setup basic logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -43,8 +43,8 @@ app.include_router(rag_router, prefix="/api")
 app.include_router(analytics_router, prefix="/api")
 app.include_router(batch_router, prefix="/api")
 
-from app.api.multimodal_routes import router as multimodal_router
-from app.api.agent_routes import router as agent_router
+from .api.multimodal_routes import router as multimodal_router
+from .api.agent_routes import router as agent_router
 app.include_router(multimodal_router, prefix="/api")
 app.include_router(agent_router, prefix="/api")
 

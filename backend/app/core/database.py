@@ -5,7 +5,7 @@ from sqlmodel import SQLModel, create_engine, Session
 from dotenv import load_dotenv
 
 # Import models to ensure they are registered with SQLModel
-from app.models import Document, DocumentEmbedding
+from ..models import Document, DocumentEmbedding
 
 load_dotenv()
 logger = logging.getLogger(__name__)

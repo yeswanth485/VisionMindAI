@@ -1,7 +1,7 @@
 from fastapi import APIRouter, File, UploadFile, Form, HTTPException
 from typing import Optional
 import shutil
-from app.services.multimodal_pipeline import MultimodalPipeline
+from ..services.multimodal_pipeline import MultimodalPipeline
 
 router = APIRouter(prefix="/multimodal", tags=["multimodal"])
 

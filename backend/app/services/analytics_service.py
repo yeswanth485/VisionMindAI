@@ -1,7 +1,7 @@
 from sqlmodel import Session, select, func
 from typing import Dict, Any, List
-from app.core.database import get_engine
-from app.models.document import Document
+from ..core.database import get_engine
+from ..models.document import Document
 from datetime import datetime, timedelta
 import time
 from functools import wraps
