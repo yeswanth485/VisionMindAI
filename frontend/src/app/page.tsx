@@ -5,8 +5,10 @@ export default function Home() {
     <div className="flex flex-col min-h-screen p-8 lg:p-12">
       <header className="mb-12 flex justify-between items-center">
         <div>
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">Process Document</h1>
-          <p className="text-textMuted text-lg">Upload an invoice, receipt, or ID for instant intelligence extraction.</p>
+          <h1 className="text-3xl md:text-5xl font-black mb-3 text-white tracking-tighter">VisionMind <span className="text-primary italic">AI</span></h1>
+          <p className="text-textMuted text-lg max-w-2xl">
+            Enterprise-Grade Document Intelligence. Upload an invoice, receipt, or resume to unleash instantaneous neural extraction, validation, and real-world ATS scoring.
+          </p>
         </div>
         <div className="hidden md:flex gap-4">
           <div className="glass px-4 py-2 rounded-lg text-sm flex items-center gap-2">

@@ -33,13 +33,27 @@ export default function Studio() {
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-black via-gray-900/50 to-black">
       <div className="container mx-auto px-6 py-12 max-w-6xl">
-        <div className="glass-card p-8 mb-8">
-          <h1 className="text-4xl md:text-5xl font-black bg-gradient-to-r from-primary via-blue-400 to-purple-500 bg-clip-text text-transparent mb-6 tracking-tight">
-            Multimodal Studio
-          </h1>
-          <p className="text-xl text-textMuted/80 max-w-2xl leading-relaxed">
-            Upload video, audio, images or documents for neural multimodal AI analysis
-          </p>
+        <div className="glass-card p-8 mb-8 relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center shrink-0 mt-1">
+              <span className="text-2xl">🧠</span>
+            </div>
+            <div>
+              <h1 className="text-4xl md:text-5xl font-black bg-gradient-to-r from-primary via-blue-400 to-purple-500 bg-clip-text text-transparent mb-4 tracking-tight">
+                VisionMind Studio
+              </h1>
+              <p className="text-lg text-textMuted/90 leading-relaxed mb-4 max-w-3xl">
+                Your Multimodal Intelligence Hub. Upload resumes, invoices, images, audio, or video files to instantly extract actionable neural insights. The AI automatically classifies the file and generates contextual data, ready for real-world application.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <span className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs text-white/70">📄 Documents</span>
+                <span className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs text-white/70">🖼️ Images</span>
+                <span className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs text-white/70">🎵 Audio</span>
+                <span className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs text-white/70">🎬 Video</span>
+              </div>
+            </div>
+          </div>
         </div>
         
         <div className="space-y-8">
