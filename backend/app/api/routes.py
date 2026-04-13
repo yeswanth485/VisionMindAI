@@ -6,9 +6,9 @@ import uuid
 import aiofiles
 import os
 
-from app.models.document import Document
-from app.services.pipeline import DocumentPipeline
-from app.core.database import get_engine
+from ..models.document import Document
+from ..services.pipeline import DocumentPipeline
+from ..core.database import get_engine
 
 router = APIRouter()
 pipeline = DocumentPipeline()

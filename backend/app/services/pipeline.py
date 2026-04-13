@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 from .rag_service import store_embedding
 from .action_engine import suggest_actions
 from .ats_service import ats_service
-from app.core.ai_client import ai_client
+from ..core.ai_client import ai_client
 
 load_dotenv()
 

@@ -3,9 +3,9 @@ from typing import Dict, Any, Optional
 from sqlmodel import Session, select
 import uuid
 
-from app.models.document import Document
-from app.core.database import get_engine
-from app.services.agent_planner import AgentPlanner
+from ..models.document import Document
+from ..core.database import get_engine
+from ..services.agent_planner import AgentPlanner
 
 router = APIRouter(prefix="/agent", tags=["agent"])
 planner = AgentPlanner()

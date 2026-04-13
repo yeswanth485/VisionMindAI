@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from app.core.ai_client import ai_client as client
+from ..core.ai_client import ai_client as client
 
 # Initialize ChromaDB client
 try:

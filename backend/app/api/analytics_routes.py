@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from typing import Dict, Any, List
-from app.services.analytics_service import get_analytics_summary, get_processing_timeline, get_top_vendors
+from ..services.analytics_service import get_analytics_summary, get_processing_timeline, get_top_vendors
 
 router = APIRouter()
 

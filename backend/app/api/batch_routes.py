@@ -6,7 +6,7 @@ import uuid
 import aiofiles
 import os
 
-from app.models.document import Document
+from ..models.document import Document
 from app.services.pipeline import DocumentPipeline
 from app.core.database import get_engine
 
