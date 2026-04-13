@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 
 interface UploadFormProps {
   onUpload?: (file: File) => Promise<void>;
@@ -7,11 +7,11 @@ interface UploadFormProps {
 
 const UploadForm = ({ onUpload, loading }: UploadFormProps) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [internalUploadStatus, setInternalUploadStatus] = useState<'idle' | 'uploading' | 'success' | 'error'>('idle');
-  const [documentId, setDocumentId] = useState<string | null>(null);
+  const [dragActive, setDragActive] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const isUploading = loading || internalUploadStatus === 'uploading';
+  const isUploading = loading;
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -21,8 +21,28 @@ const UploadForm = ({ onUpload, loading }: UploadFormProps) => {
     }
   };
 
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
 
-  const handleUpload = async () => {
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      setSelectedFile(e.dataTransfer.files[0]);
+      setErrorMessage('');
+    }
+  };
+
+  const handleUpload = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!selectedFile) {
       setErrorMessage('Please select a file to upload');
       return;
@@ -35,103 +55,100 @@ const UploadForm = ({ onUpload, loading }: UploadFormProps) => {
       } catch (error) {
         setErrorMessage(error instanceof Error ? error.message : 'An unknown error occurred');
       }
-      return;
-    }
-
-    setInternalUploadStatus('uploading');
-    setErrorMessage('');
-
-    try {
-      const formData = new FormData();
-      formData.append('file', selectedFile);
-
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Upload failed');
-      }
-
-      const data = await response.json();
-      setDocumentId(data.document_id);
-      setInternalUploadStatus('success');
-    } catch (error) {
-      setInternalUploadStatus('error');
-      setErrorMessage(error instanceof Error ? error.message : 'An unknown error occurred');
     }
   };
 
   const handleReset = () => {
     setSelectedFile(null);
-    setInternalUploadStatus('idle');
-    setDocumentId(null);
     setErrorMessage('');
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-md p-6">
-      <h2 className="text-xl font-semibold mb-4 text-gray-800">Upload Document</h2>
+    <div className="glass-card p-8 border-primary/20 bg-primary/5 animate-fade-in">
+      <h2 className="text-2xl font-bold mb-6 text-white tracking-tight flex items-center gap-3">
+        <span className="w-8 h-8 bg-primary/20 rounded-lg flex items-center justify-center text-sm">📁</span>
+        Upload Document
+      </h2>
       
-      {(internalUploadStatus === 'success') && (
-        <div className="bg-green-50 border-l-4 border-green-500 p-4 mb-4">
-          <p className="text-green-800">Document uploaded successfully! Processing...</p>
-          {documentId && (
-            <p className="mt-1 text-sm text-green-600">
-              Document ID: <code className="bg-green-100 px-2 py-0.5 rounded">{documentId}</code>
-            </p>
-          )}
+      {errorMessage && (
+        <div className="bg-red-500/10 border border-red-500/20 p-4 mb-6 rounded-xl transition-all">
+          <p className="text-red-400 text-sm flex items-center gap-2">
+            <span className="text-lg">⚠️</span> {errorMessage}
+          </p>
         </div>
       )}
 
-      {(internalUploadStatus === 'error' || errorMessage) && (
-        <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-4">
-          <p className="text-red-800">{errorMessage}</p>
-        </div>
-      )}
-
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Select a document (PDF, PNG, JPG, JPEG, TIFF, BMP)
-        </label>
-        <div className="flex items-center">
+      <form onSubmit={handleUpload} className="space-y-6">
+        <div 
+          className={`relative group cursor-pointer transition-all duration-300 ${
+            dragActive ? 'scale-[1.02] border-primary shadow-[0_0_20px_rgba(59,130,246,0.3)]' : ''
+          }`}
+          onDragEnter={handleDrag}
+          onDragLeave={handleDrag}
+          onDragOver={handleDrag}
+          onDrop={handleDrop}
+          onClick={() => fileInputRef.current?.click()}
+        >
           <input
+            ref={fileInputRef}
             type="file"
-            id="document-upload"
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
-            accept=".pdf,.png,.jpg,.jpeg,.tiff,.bmp"
+            className="hidden"
+            accept=".pdf,.png,.jpg,.jpeg,.tiff,.bmp,.txt,.doc,.docx"
             onChange={handleFileChange}
             disabled={isUploading}
           />
+          
+          <div className={`border-2 border-dashed rounded-2xl p-10 flex flex-col items-center justify-center gap-4 transition-all ${
+            selectedFile ? 'border-primary/50 bg-primary/10' : 'border-white/10 hover:border-primary/30 hover:bg-white/5'
+          }`}>
+            <div className={`w-16 h-16 rounded-full flex items-center justify-center text-3xl transition-transform duration-500 ${
+              selectedFile ? 'bg-primary text-white scale-110 shadow-lg' : 'bg-white/5 text-white/30 group-hover:scale-110'
+            }`}>
+              {selectedFile ? '📄' : '☁️'}
+            </div>
+            
+            <div className="text-center">
+              <p className="text-white font-bold mb-1">
+                {selectedFile ? selectedFile.name : 'Click or drag file to upload'}
+              </p>
+              <p className="text-textMuted text-xs">
+                {selectedFile 
+                  ? `${Math.round(selectedFile.size / 1024)} KB • Ready for synthesis` 
+                  : 'PDF, PNG, JPG, JPEG, TIFF, BMP, TXT'}
+              </p>
+            </div>
+          </div>
         </div>
-        {selectedFile && (
-          <p className="mt-1 text-xs text-gray-500">
-            Selected: {selectedFile.name} ({Math.round(selectedFile.size / 1024)} KB)
-          </p>
-        )}
-      </div>
 
-      <div className="flex flex-col sm:flex-row sm:gap-3">
-        <button
-          onClick={handleUpload}
-          disabled={isUploading || !selectedFile}
-          className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isUploading ? 'Uploading...' : 'Upload Document'}
-        </button>
-
-        {selectedFile && (
+        <div className="flex gap-4">
           <button
-            onClick={handleReset}
-            disabled={isUploading}
-            className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-md transition-colors disabled:opacity-50"
+            type="submit"
+            disabled={isUploading || !selectedFile}
+            className="flex-1 py-4 bg-primary text-white font-bold rounded-xl hover:shadow-[0_0_20px_rgba(59,130,246,0.6)] disabled:opacity-50 disabled:shadow-none transition-all flex items-center justify-center gap-2 group overflow-hidden relative"
           >
-            Reset
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-shimmer" />
+            {isUploading ? (
+              <>
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                Analyzing...
+              </>
+            ) : (
+              <>Synthesize Knowledge <span className="text-xl group-hover:translate-x-1 transition-transform">→</span></>
+            )}
           </button>
-        )}
-      </div>
+
+          {selectedFile && !isUploading && (
+            <button
+              type="button"
+              onClick={handleReset}
+              className="px-6 py-4 bg-white/5 border border-white/10 text-white font-bold rounded-xl hover:bg-white/10 transition-all"
+            >
+              Reset
+            </button>
+          )}
+        </div>
+      </form>
     </div>
   );
 };
