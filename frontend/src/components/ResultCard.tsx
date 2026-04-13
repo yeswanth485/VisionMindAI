@@ -7,7 +7,10 @@ interface ResultCardProps {
 }
 
 export default function ResultCard({ title, icon, children, delay = 0, result }: ResultCardProps) {
-  // If result is provided, we use its data for title, icon and display its content
+  // Defensive checks to prevent UI crashes on partial/error data
+  const hasError = result?.error || result?.input_type === 'error' || result?.status === 'failed';
+  const errorMessage = result?.error || result?.summary || result?.errors?.[0] || 'Unknown processing error';
+
   const displayTitle = result ? result.summary || 'Analysis Result' : title;
   const displayIcon = result ? (result.input_type === 'video' ? '📹' : result.input_type === 'audio' ? '🔊' : '📄') : icon;
 
@@ -37,9 +40,12 @@ export default function ResultCard({ title, icon, children, delay = 0, result }:
       <div className="flex-1 overflow-auto custom-scrollbar">
         {result ? (
           <div className="space-y-6">
-            {result.error && (
-              <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm flex items-center gap-2">
-                <span className="text-lg">⚠️</span> {result.error}
+            {hasError && (
+              <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm flex flex-col gap-2">
+                <div className="flex items-center gap-2 font-bold">
+                  <span className="text-lg">⚠️</span> System Alert
+                </div>
+                <p className="opacity-80 leading-relaxed">{errorMessage}</p>
               </div>
             )}
             
@@ -53,7 +59,7 @@ export default function ResultCard({ title, icon, children, delay = 0, result }:
               </div>
             )}
 
-            {/* Structured Metadata - Filtering out internal large fields */}
+            {/* Structured Metadata */}
             {result.structured_data && (
               <div className="grid grid-cols-2 gap-3">
                 {Object.entries(result.structured_data)

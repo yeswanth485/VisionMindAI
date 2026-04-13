@@ -16,14 +16,12 @@ async def execute_agent_goal(
     document_id: Optional[str] = Body(None, embed=True)
 ):
     """
-    Execute an AI agent goal on a specific document context or general context
+    Execute an AI agent goal on a specific document context or general context (Async)
     """
     try:
-        # Initialize doc_uuid to None to prevent UnboundLocalError
         doc_uuid = None
         context = {}
         
-        # If document_id provided, fetch it for context
         if document_id:
             try:
                 doc_uuid = uuid.UUID(document_id)
@@ -32,7 +30,6 @@ async def execute_agent_goal(
                     if not document:
                         raise HTTPException(status_code=404, detail="Document context not found")
                     
-                    # Build context from document
                     context = {
                         "id": str(document.id),
                         "doc_type": document.doc_type,
@@ -43,18 +40,17 @@ async def execute_agent_goal(
             except ValueError:
                 raise HTTPException(status_code=400, detail="Invalid document ID format")
 
-        # Fallback to general intelligence if no context
         if not context:
             context = {"mode": "general_intelligence", "status": "no_document_context"}
 
-        # 1. Generate Plan
-        plan = planner.generate_plan(goal, context)
+        # 1. Generate Plan (AWAIT async method)
+        plan = await planner.generate_plan(goal, context)
         
-        # 2. Execute Plan (In a real system, some steps might be backgrounded)
-        execution_result = planner.execute_plan(plan, context)
+        # 2. Execute Plan (AWAIT async method)
+        execution_result = await planner.execute_plan(plan, context)
         
-        # 3. If we have a document, update its agent status in DB
-        if document_id and "doc_uuid" in locals():
+        # 3. Update DB
+        if doc_uuid:
             with Session(get_engine()) as session:
                 document = session.get(Document, doc_uuid)
                 if document:
@@ -67,7 +63,12 @@ async def execute_agent_goal(
 
     except Exception as e:
         print(f"Agent execution error: {e}")
-        raise HTTPException(status_code=500, detail=f"Agent failed to execute: {str(e)}")
+        # Return structured error to frontend
+        return {
+            "plan": [],
+            "status": "failed",
+            "errors": [str(e)]
+        }
 
 @router.get("/status/{document_id}")
 async def get_agent_status(document_id: str):
