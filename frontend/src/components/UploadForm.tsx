@@ -21,6 +21,7 @@ const UploadForm = ({ onUpload, loading }: UploadFormProps) => {
     }
   };
 
+
   const handleUpload = async () => {
     if (!selectedFile) {
       setErrorMessage('Please select a file to upload');

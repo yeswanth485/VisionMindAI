@@ -58,3 +58,27 @@ export const documentAPI = {
         return response.data;
     },
 };
+
+/**
+ * Multimodal AI Processing API
+ */
+export const multimodalAPI = {
+    /**
+     * Process video/audio/document through multimodal pipeline
+     */
+    process: async (file: File, userGoal?: string): Promise<any> => {
+        const formData = new FormData();
+        formData.append('file', file);
+        if (userGoal) {
+            formData.append('user_goal', userGoal);
+        }
+
+        const response = await apiClient.post('/multimodal/process', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        return response.data;
+    },
+};
+
