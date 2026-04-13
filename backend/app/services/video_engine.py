@@ -6,7 +6,7 @@ from PIL import Image
 import io
 import moviepy as mp
 import httpx
-from app.core.config import settings
+from ..core.config import settings
 
 # OpenRouter API configuration
 OPENROUTER_API_KEY = settings.OPENROUTER_API_KEY

@@ -1,15 +1,9 @@
 import json
-import httpx
-from typing import List, Dict, Any
-from app.core.config import settings
-
-# OpenRouter API configuration
-OPENROUTER_API_KEY = settings.OPENROUTER_API_KEY
-OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
-MODEL_NAME = "openai/gpt-4o"  # Using GPT-4o for multimodal reasoning
+from typing import List, Tuple
+from ..core.ai_client import ai_client
 
 class MultimodalFusion:
-    def fuse_contexts(self, ocr_text: str, frame_descriptions: List[tuple], transcript: str) -> str:
+    def fuse_contexts(self, ocr_text: str, frame_descriptions: List[Tuple[float, str]], transcript: str) -> str:
         """Combine OCR text, frame descriptions, and transcript into unified context"""
         try:
             # Format frame descriptions
@@ -34,18 +28,13 @@ AUDIO TRANSCRIPT:
         except Exception as e:
             print(f"Error fusing contexts: {e}")
             return "Error combining contexts"
-    
-    def run_multimodal_reasoning(self, fused_context: str) -> dict:
-        """Run multimodal reasoning AI on fused context"""
+
+    async def run_multimodal_reasoning(self, fused_context: str) -> dict:
+        """Run multimodal reasoning AI on fused context using AsyncOpenAI client"""
         try:
-            headers = {
-                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-                "Content-Type": "application/json"
-            }
-            
-            payload = {
-                "model": MODEL_NAME,
-                "messages": [
+            response = await ai_client.chat.completions.create(
+                model="openai/gpt-4o",
+                messages=[
                     {
                         "role": "system",
                         "content": "You are a multimodal reasoning AI. Align all inputs. Resolve conflicts between modalities. Build a unified context. Do not favor one modality blindly. Resolve contradictions logically."
@@ -55,15 +44,11 @@ AUDIO TRANSCRIPT:
                         "content": fused_context
                     }
                 ],
-                "response_format": {"type": "json_object"},
-                "max_tokens": 1000
-            }
+                response_format={"type": "json_object"},
+                max_tokens=1000
+            )
             
-            response = httpx.post(OPENROUTER_API_URL, headers=headers, json=payload, timeout=30.0)
-            response.raise_for_status()
-            
-            result = response.json()
-            content = result["choices"][0]["message"]["content"]
+            content = response.choices[0].message.content
             
             # Parse JSON response
             try:
@@ -90,7 +75,7 @@ AUDIO TRANSCRIPT:
                 "key_entities": [],
                 "relationships": []
             }
-    
+
     def classify_input(self, unified_summary: str) -> str:
         """Classify the input as meeting, tutorial, interview, lecture, presentation, or other"""
         summary_lower = unified_summary.lower()
@@ -108,3 +93,4 @@ AUDIO TRANSCRIPT:
             return "presentation"
         else:
             return "other"
+
