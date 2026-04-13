@@ -78,9 +78,12 @@ export default function AgentCommandCenter() {
         <h1 className="text-3xl md:text-5xl font-black mb-3 text-white tracking-tighter">
           Neural <span className="text-primary italic">Agent</span>
         </h1>
-        <p className="text-textMuted text-lg max-w-2xl">
-          Assign complex goals to the autonomous intelligence system. It will analyze your context and build an executable roadmap.
-        </p>
+        <div className="glass-card p-6 border-l-4 border-l-primary bg-primary/5 max-w-3xl">
+          <h2 className="text-lg font-bold text-white mb-2">Autonomous AI Planner</h2>
+          <p className="text-textMuted text-sm">
+            The Neural Agent transforms complex descriptions into secure, executable task roadmaps. For example, instruct the agent to &quot;Draft a custom cover letter based on my latest resume&quot; and watch it dynamically divide the task into logical, sequential steps.
+          </p>
+        </div>
       </header>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">

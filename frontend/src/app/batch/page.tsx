@@ -127,9 +127,12 @@ export default function BatchUploadPage() {
         <h1 className="text-3xl md:text-5xl font-black text-white tracking-tighter mb-2">
            BATCH <span className="text-primary">UPLOAD</span>
         </h1>
-        <p className="text-textMuted text-lg max-w-2xl">
-          Ingest multiple documents into the VisionMind Neural Engine. Up to 10 files per session.
-        </p>
+        <div className="glass-card p-6 border-l-4 border-l-primary bg-primary/5 mb-6 max-w-3xl">
+          <h2 className="text-lg font-bold text-white mb-2">Volume Intelligence Engine</h2>
+          <p className="text-textMuted text-sm">
+            Process up to 10 documents simultaneously. Perfect for HR teams reviewing multiple resumes or finance teams scanning bulk invoices. Drop your files here to mass-extract standardized JSON insights in parallel.
+          </p>
+        </div>
       </header>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-12 items-start">

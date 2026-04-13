@@ -104,6 +104,12 @@ function ATSScannerContent() {
             </div>
           ) : (
             <div className="p-8">
+              <div className="mb-8 glass-card p-6 border-l-4 border-l-accent bg-accent/5">
+                <h2 className="text-xl font-bold text-white mb-2">Deep Neural Resume Analysis</h2>
+                <p className="text-textMuted text-sm">
+                  See exactly what modern Applicant Tracking Systems (ATS) see. The system has identified critical missing keywords, evaluated your profile, and generated an AI roadmap to help you achieve 99% compatibility in the real world.
+                </p>
+              </div>
               <NeuralATSDashboard data={data} filename={data.filename} />
             </div>
           )}
