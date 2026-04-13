@@ -87,7 +87,6 @@ class MultimodalPipeline:
             if input_type == InputType.VIDEO:
                 try:
                     frames, timestamps = self.video_engine.extract_keyframes(file_content)
-                    # AWAIT the async transcription and analysis
                     transcript = await self.audio_engine.transcribe_video_audio(file_content)
                     video_analysis = await self.video_engine.analyze_video(list(zip(frames, timestamps)), transcript)
 
@@ -112,7 +111,6 @@ class MultimodalPipeline:
 
             elif input_type == InputType.AUDIO:
                 try:
-                    # AWAIT the async transcription
                     transcript = await self.audio_engine.transcribe_audio(file_content)
                     result["summary"] = f"Audio transcript extracted ({len(transcript)} characters)"
                     result["structured_data"] = {
@@ -137,7 +135,6 @@ class MultimodalPipeline:
                     transcript=""
                 )
 
-                # AWAIT the async reasoning call
                 reasoning = await self.multimodal_fusion.run_multimodal_reasoning(fused_context)
 
                 result["summary"] = reasoning.get("unified_summary", f"Document processed: {filename}")
@@ -158,7 +155,6 @@ class MultimodalPipeline:
                     f"Entity count: {len(reasoning.get('key_entities', []))}"
                 ]
 
-            # ── Engine 2 (for video/audio, if not already done) ───────────
             if not result["unified_reasoning"].get("unified_summary"):
                 fused_context = self.multimodal_fusion.fuse_contexts(
                     ocr_text=result["structured_data"].get("document_text", "")
@@ -171,20 +167,18 @@ class MultimodalPipeline:
             else:
                 unified_reasoning = result["unified_reasoning"]
 
-            # ── Engine 3: Classification + Action Decision ─────────────────
-            # AWAIT classification
             input_classification = await self.multimodal_fusion.classify_input(
                 unified_reasoning.get("unified_summary", "")
             )
             result["structured_data"]["input_classification"] = input_classification
 
-            action_analysis = self.action_decision.analyze_for_actions(
+            # AWAIT the async action decision engine
+            action_analysis = await self.action_decision.analyze_for_actions(
                 structured_data=result["structured_data"],
                 insights={"topics": result["insights"]},
                 validation={"status": "processed"}
             )
 
-            # ── Engine 4: Autonomous Agent ─────────────────────────────────
             if user_goal:
                 goal_intent = self.agent_planner.parse_goal(user_goal)
 
@@ -195,12 +189,10 @@ class MultimodalPipeline:
                     "goal_intent": goal_intent
                 }
 
-                # AWAIT the async agent calls
                 plan = await self.agent_planner.generate_plan(user_goal, agent_context)
                 agent_result = await self.agent_planner.execute_plan(plan, agent_context)
                 result["agent_result"] = agent_result
 
-                # Store in memory
                 session_id = str(uuid.uuid4())
                 self.memory_system.store_session(
                     session_id=session_id,
@@ -209,7 +201,6 @@ class MultimodalPipeline:
                 )
                 result["agent_result"]["session_id"] = session_id
             else:
-                # No agent goal — just expose recommended actions
                 try:
                     auto_actions, confirm_actions = self.action_decision.filter_executable(
                         action_analysis.get("recommended_actions", [])
@@ -219,7 +210,6 @@ class MultimodalPipeline:
                 except Exception as e:
                     print(f"Action filter error: {e}")
 
-            # ── Confidence Score ───────────────────────────────────────────
             confidence_factors = [
                 0.3 if result["summary"] and len(result["summary"]) > 10 else 0.0,
                 0.3 if result["unified_reasoning"].get("unified_summary") and
