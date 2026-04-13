@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { multimodalAPI } from '@/services/api';
 import UploadForm from '@/components/UploadForm';
-import FileUpload from '@/components/FileUpload';
 import ResultCard from '@/components/ResultCard';
 
 export default function Studio() {
@@ -12,19 +12,7 @@ export default function Studio() {
   const handleUpload = async (file: File) => {
     setLoading(true);
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      
-      const response = await fetch('/api/multimodal/process', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
+      const result = await multimodalAPI.process(file);
       setResults(prev => [result, ...prev]);
     } catch (error) {
       console.error('Upload error:', error);
@@ -41,39 +29,55 @@ export default function Studio() {
     }
   };
 
+
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">
-          Multimodal Studio
-        </h1>
-        <p className="text-gray-600 mb-8">
-          Upload video, audio, or documents for multimodal AI analysis
-        </p>
+    <div className="relative min-h-screen bg-gradient-to-br from-black via-gray-900/50 to-black">
+      <div className="container mx-auto px-6 py-12 max-w-6xl">
+        <div className="glass-card p-8 mb-8">
+          <h1 className="text-4xl md:text-5xl font-black bg-gradient-to-r from-primary via-blue-400 to-purple-500 bg-clip-text text-transparent mb-6 tracking-tight">
+            Multimodal Studio
+          </h1>
+          <p className="text-xl text-textMuted/80 max-w-2xl leading-relaxed">
+            Upload video, audio, images or documents for neural multimodal AI analysis
+          </p>
+        </div>
         
-        <div className="space-y-6">
+        <div className="space-y-8">
           <UploadForm onUpload={handleUpload} loading={loading} />
           
           {results.length > 0 && (
-            <div className="space-y-4">
-              <h2 className="text-2xl font-semibold text-gray-800">
-                Analysis Results
-              </h2>
-              <div className="grid gap-4">
+            <div className="space-y-6">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 bg-primary/20 rounded-2xl flex items-center justify-center">
+                  <span className="text-2xl">🎥</span>
+                </div>
+                <div>
+                  <h2 className="text-3xl font-bold text-white tracking-tight">Neural Analysis</h2>
+                  <p className="text-textMuted">{results.length} multimodal processing results</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                 {results.map((result, index) => (
-                  <ResultCard key={index} result={result} />
+                  <ResultCard key={index} result={result} delay={index * 100} />
                 ))}
               </div>
             </div>
           )}
           
           {results.length === 0 && !loading && (
-            <p className="text-gray-500 text-center py-12">
-              No results yet. Upload a file to get started.
-            </p>
+            <div className="glass-card p-16 text-center">
+              <div className="w-24 h-24 mx-auto mb-6 bg-white/10 rounded-3xl flex items-center justify-center">
+                <span className="text-4xl">🎥</span>
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-4">Ready for Multimodal Processing</h3>
+              <p className="text-textMuted max-w-md mx-auto mb-8">
+                Upload any video, audio, image or document to unlock neural analysis across modalities
+              </p>
+            </div>
           )}
         </div>
       </div>
     </div>
   );
 }
+
