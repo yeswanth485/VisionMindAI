@@ -1,7 +1,7 @@
 import json
 import httpx
 from typing import List, Dict, Any
-from app.core.config import settings
+from ..core.config import settings
 
 # OpenRouter API configuration
 OPENROUTER_API_KEY = settings.OPENROUTER_API_KEY

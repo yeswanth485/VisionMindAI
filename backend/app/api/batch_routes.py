@@ -7,8 +7,8 @@ import aiofiles
 import os
 
 from ..models.document import Document
-from app.services.pipeline import DocumentPipeline
-from app.core.database import get_engine
+from ..services.pipeline import DocumentPipeline
+from ..core.database import get_engine
 
 router = APIRouter()
 pipeline = DocumentPipeline()
